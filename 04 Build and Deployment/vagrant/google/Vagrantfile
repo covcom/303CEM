@@ -1,0 +1,38 @@
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "gce"
+
+  config.vm.synced_folder "./src", "/home/marktyers/src", create: true
+
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  # SHELL PROVISIONER
+  config.vm.provision "shell", inline: <<-SHELL
+    export HOME=/home/marktyers
+    # installing nvm
+    curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    echo "source ~/.nvm/nvm.sh" >> /home/marktyers/.bashrc
+    source /home/marktyers/.nvm/nvm.sh
+
+    # installing nodejs
+    # nvm install has a 'noisy' output so we send it all to /dev/null
+    nvm install 6.5.0 &> /dev/null
+    chown -R marktyers:marktyers /home/marktyers/.nvm
+    echo "export PORT=8080" >> /home/marktyers/.profile
+    source /home/marktyers/.profile
+  SHELL
+
+  config.vm.provider :google do |google, override|
+    google.google_project_id = "myapi-142519"
+    google.google_client_email = "34404495536-compute@developer.gserviceaccount.com"
+    google.google_json_key_location = "myAPI-8f0436418e40.json"
+    google.machine_type = "f1-micro"
+    google.image = "ubuntu-1604-xenial-v20160830"
+
+    override.ssh.username = "marktyers"
+    override.ssh.private_key_path = "~/.ssh/id_rsa"
+  end
+
+end
+
+# https://github.com/mitchellh/vagrant-google

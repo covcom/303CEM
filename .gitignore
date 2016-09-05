@@ -2,3 +2,5 @@
 *.iso
 *.vdi
 .vagrant/
+*..gserviceaccount.com
+myAPI-*.json
