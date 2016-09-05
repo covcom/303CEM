@@ -20,6 +20,33 @@ You have only bee working on one server at a time but in real life you might nee
 
 In this worksheet you will learn how to use a range of tools that can automate this process and even carry it out in parallel!
 
+## Vagrant
+
+Search for Vagrant boxes at https://atlas.hashicorp.com/boxes/search enter a search term. Ubuntu 16 is called xenial
+
+```
+vagrant init ubuntu/trusty64
+vagrant up
+```
+
+Vagrant includes a SSH client that can be used to connect to the VM.
+```
+vagrant ssh
+```
+
+Sometimes (for example when we want to automate our deployment using Ansible) we need to be able to connect using a standard SSH client. To do this we need to find the SSH connection details. This will print out a lot of information, only the relevent lines are reproduced below:
+```
+vagrant ssh-config
+  HostName 127.0.0.1
+  User vagrant
+  Port 2222
+  IdentityFile "/path/to/private_key"
+```
+We can now use this information to connect using an SSH client.
+```
+ssh vagrant@127.0.0.1 -p 2222 -i "/path/to/private_key"
+```
+
 ## Ansible
 
 Push-based solution. Ships with modules to automate most typical tasks. Uses the normal system modules (apt on Ubuntu/Debian). Modules are the primary unit of reuse.

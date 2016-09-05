@@ -1,0 +1,12 @@
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/trusty64"
+  
+  config.vm.synced_folder "./src", "/home/vagrant/src" create: true
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # apt-get update
+    apt-get install -y nodejs
+    echo "export PORT=8080" >> ~/.profile
+  SHELL
+end
