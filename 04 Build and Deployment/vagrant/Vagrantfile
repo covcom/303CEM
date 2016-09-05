@@ -2,11 +2,59 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
   
-  config.vm.synced_folder "./src", "/home/vagrant/src" create: true
+  # ensures the contents of the src/ directory is synced automatically to the server.
+  config.vm.synced_folder "./src", "/home/vagrant/src", create: true
 
+  # maps port 8080 in the VM to port 80 on the host machine
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  # SHELL PROVISIONER
   config.vm.provision "shell", inline: <<-SHELL
     # apt-get update
-    apt-get install -y nodejs
-    echo "export PORT=8080" >> ~/.profile
+    # apt-get install -y nodejs
+
+    # installing nvm
+    export HOME=/home/vagrant
+    curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    echo "source ~/.nvm/nvm.sh" >> /home/vagrant/.bashrc
+    source /home/vagrant/.nvm/nvm.sh
+
+    # installing nodejs
+    # nvm install has a 'noisy' output so we send it all to /dev/null
+    nvm install 6.5.0 &> /dev/null
+    chown -R vagrant:vagrant /home/vagrant/.nvm
+    export HOME=/home/vagrant
+
+    # setting the PORT environment variable and reloading
+    echo "export PORT=8080" >> /home/vagrant/.profile
+    source /home/vagrant/.profile
+
+    # install forever with -w flag to restart nodejs if files change
+    npm install -g forever
+    forever start -w src/server.js
+
   SHELL
 end
+
+# USEFUL VAGRANT COMMANDS
+
+# power up the server and run the Vagrantfile script.
+# vagrant up 
+
+# check status of vagrant box
+# vagrant status
+
+# SSH into the server using vagrant
+# vagrant ssh
+
+# SSH into the server using terminal
+# ssh vagrant@127.0.0.1 -p 2222 -i ".vagrant/machines/default/virtualbox/private_key"
+
+# stop the vagrant box
+# vagrant halt
+
+# terminate virtual machine
+# vagrant distroy
+
+# upgrade to latest version of Ubuntu server
+# do-release-upgrade
