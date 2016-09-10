@@ -36,6 +36,10 @@ Vagrant.configure("2") do |config|
   SHELL
 end
 
+# service --status-all
+# service apache2 status
+# hostname -I (gets the IP address)
+
 # USEFUL VAGRANT COMMANDS
 
 # power up the server and run the Vagrantfile script.
@@ -43,6 +47,7 @@ end
 
 # check status of vagrant box
 # vagrant status
+# vagrant ssh-config
 
 # SSH into the server using vagrant
 # vagrant ssh
