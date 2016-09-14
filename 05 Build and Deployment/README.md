@@ -20,7 +20,16 @@ You have only bee working on one server at a time but in real life you might nee
 
 In this worksheet you will learn how to use a range of tools that can automate this process and even carry it out in parallel!
 
-## Vagrant
+There are several important terms that need to be carried out when building servers:
+
+1. Provisioning
+2. Deployment
+3. Orchestration
+4. Configuration Management
+
+## 1 Vagrant
+
+
 
 Search for Vagrant boxes at https://atlas.hashicorp.com/boxes/search enter a search term. Ubuntu 16 is called xenial
 
@@ -47,46 +56,62 @@ We can now use this information to connect using an SSH client.
 ssh vagrant@127.0.0.1 -p 2222 -i "/path/to/private_key"
 ```
 
-## Ansible
+Synced folders
 
-Push-based solution. Ships with modules to automate most typical tasks. Uses the normal system modules (apt on Ubuntu/Debian). Modules are the primary unit of reuse.
-
-Demonstration, get students to install base system and share public keys. Push a build out to every server in the lab...
-
-Ansible scripts are yaml files and are called playbooks.
-
-Servers must have SSH and Python (3.4?) installed. The control machine needs Python installed.
-
-Only need to install Ansible on the _control machine_.
-
-### Installing Ansible
-
-https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-ansible-on-ubuntu-14-04
-
-Install package to simplify working with PPAs. Then we can add the Ansible PPA.
 ```
-sudo apt-get update
-sudo apt-get install software-properties-common
-sudo apt-add-repository ppa:ansible/ansible
-sudo apt-get update
-sudo apt-get install ansible
+config.vm.synced_folder "./src", "/home/vagrant/src", create: true
 ```
 
-### Exchange SSH keys.
 
-Create a user account on each server and generate SSH keys. Use the `ssh-copy-id` command to copy keys.
-```
-ssh-copy-id -i ~/.ssh/id_rsa.pub cloud9@cloud9
-```
 
-### Configuring Ansible Hosts
+### 1.1 Provisioning
 
-Open the `/etc/ansible/hosts` file with root privileges.
+Instead of manually installing software, Vagrant has support for **provisioning** which enables it to automatically install the correct software when the server is created. In this example we will be creating a simple Apache web server. Open the `ftp/` directory and study the directory structure and files.
 ```
-[live_servers]
-host1 ansible_ssh_host=192.0.2.1
-host2 ansible_ssh_host=192.0.2.2
-host3 ansible_ssh_host=192.0.2.3
+.
+├── Vagrantfile
+├── bootstrap.sh
+└── src
+    └── html
+        └── index.html
 ```
 
-## Grunt
+
+
+```
+# USEFUL BASH COMMANDS
+
+service --status-all
+service apache2 status
+hostname -I (gets the IP address)
+
+# USEFUL VAGRANT COMMANDS
+
+# power up the server and run the Vagrantfile script.
+vagrant up 
+
+# check status of vagrant box
+vagrant status
+vagrant ssh-config
+
+# SSH into the server using vagrant
+vagrant ssh
+
+# find the SSH connection details
+vagrant ssh-config
+
+# SSH into the server using terminal
+ssh vagrant@127.0.0.1 -p 2222 -i ".vagrant/machines/default/virtualbox/private_key"
+
+# stop the vagrant box
+vagrant halt
+
+# terminate virtual machine
+vagrant destroy
+
+# if the guest machine is already running, the provision step can be run without needing to rebuild.
+vagrant reload --provision
+
+# upgrade to latest version of Ubuntu server
+do-release-upgrade
+```
