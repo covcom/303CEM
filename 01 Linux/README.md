@@ -89,7 +89,27 @@ ls | grep ls
 ```
 You will be using pipes a lot.
 
+### 3.2 User Accounts
 
+By default, Linux is a multi-user system. In this section you will learn how to create new user accounts. This is done using the `useradd` command. Here is the command to add a new user, notice the use of **flags** such as `-s` to specify different options. Flags come in two styles, long and short. Short flags have a single `-` and comprise a single character whilst long flags start with `--` and are multi-character. The two examples below are functionally the same.
+
+```
+useradd -s /bin/bash -m -d /home/git -c "Running Node" git
+useradd --shell /bin/bash -m -d /home/git -c "Running Node" git
+```
+
+We need to learn how this works. Every tool installed includes its own _Manual_ which can be accessed using the `man` command.
+
+Open the documentation for the `useradd` command by running `man useradd`. This will open the help page.
+
+Searching 
+
+### 3.3.1 Test Your Knowledge
+
+1. Use the useradd documentation to learn the purpose of all the flags used. Now replace all the short flags with their long equivalent.
+2. Use this knowledge to create yourself a new account.
+3. Now use the `passwd` tool to assign a suitable password (you will need to use the manual!
+4. Log out and then try out your new account to make sure it works.
 
 
 1. disk partitions
