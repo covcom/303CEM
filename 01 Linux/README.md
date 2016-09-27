@@ -40,20 +40,50 @@ vagrant ssh
 
 You will be interacting with your Linux server using the **Shell**. This is a piece of software that acts as an interface between the Kernel and the user (you). Specifically the Shell is a Command-Line Interpreter (CLI). It interprets the commands you type in and sends instructions to the Kernel.
 
-### 2.1 Tasks
+If the server is physically in front of you you could attach a keyboard, mouse and monitor and log in directly. Most servers are located in a remote location (a secure server room either on-site or perhaps in a different country). How can we log in?
 
-1. Log into your server VM using the username and password you chose. Notice the shell prompt which ends with a **$** symbol.
-2. Enter the `ps` command and press the _return_ key to report on the currently running processes.
-  - Notice that this returns a single row of data with 4 columns:
+### 2.1 Secure Shell
 
+Secure Shell (SSH) is an encrypted protocol for operating a network service over an unsecured network (the Internet for example). The data is encrypted and decrypted using a public/private key pair (you will cover this in more detail in lab 3). This provides a remote command-line login which enables you to log into your server(s) from anywhere with a network connection.
+
+To connect to your server you need to use a suitable **SSH Client**. If you are running a *NIX operating system such as Linux or Mac you can use the SSH command through your Terminal but for Windows users you will need to install a third-party tool such as puTTY.
+
+There are two ways to use SSH.
+
+#### 2.1.1 Encrypted Network Connection
+
+The first way is to use automatically-generated key pairs to encrypt the network connectio.
+
+To connect you need to know the server's IP address and the port it is running over (which defaults to port 22). For Mac and Linux clients you run:
 ```
-PID TTY      TIME    CMD
-881 ttys000  0:00.12 -bash
+ssh username@xx.xx.xx.xx
+ssh -p 1234 username@xx.xx.xx.xx
 ```
-- PID: The process ID. Each running process has a unique ID.
-- TTY: Teletypewriter. A process that allows user interaction.
-- TIME: How much CPU time the process has been running.
-- CMD: The name of the command that launched the process (we are using the **bash** shell)
+Subsitute the correct username and IP address. The second example is if you need to connect over a non-standard port.
+
+#### 2.1.2 SSH Authentication
+
+An alternative is to use the key pair to perform authentication instead of typing in a password. The first step it to make sure there is a public and private key generated on the client machine.
+
+On a *NIX machine its located in a hidden directory located in the home directory (`~/.ssh/`). There should be two files, `id_rsa`, the private key and `id_rsa.pub`, the public key. If you are on *NIX there is a special command to achieve this.
+```
+ssh-copy-id username@xx.xx.xx.xx
+```
+This will add the client's public key to a list of authorised keys on the server. The list is stored in:
+```
+~/.ssh/authorized_keys
+```
+If this command is not available you may need to manually copy the public key, log on to the server and paste it into the `authorized_keys` file.
+
+Once you have done this you should be able to SSH in as normal. the server will authorise using the shared public key and you won't be asked for a password.
+
+#### 2.1.3 Tasks
+
+1. Log into your server VM over SSH using the username and password you chose. Notice the shell prompt which ends with a **$** symbol.
+2. Log out by using the `exit` command.
+3. Generate a public/private key pair if needed. 
+4. Copy your client computer's public key into the `authorized_keys` file on the server.
+5. SSH back into the server, you won't be prompted for your password.
 
 ## 3 The Filesystem
 
@@ -106,13 +136,17 @@ ls | grep ls
 ```
 You will be using pipes a lot.
 
-### 3.2 User Accounts
+## 4 Users and Groups
 
-By default, Linux is a multi-user system. In this section you will learn how to create new user accounts. This is done using the `useradd` command. Here is the command to add a new user, notice the use of **flags** such as `-s` to specify different options. Flags come in two styles, long and short. Short flags have a single `-` and comprise a single character whilst long flags start with `--` and are multi-character. The two examples below are functionally the same.
+In this section you will learn abount how access control is managed through the use of users and groups.
+
+### 4.1 User Accounts
+
+By default, Linux is a multi-user system. In this section you will learn how to create new user accounts. This is done using the `useradd` command. Here is the command to add a new user, notice the use of **flags** such as `-s` to specify different options. Flags come in two styles, long and short. Short flags have a single `-` and comprise a single character whilst long flags start with `--` and are multi-character. The two examples below are functionally the same. Don't worry about the `sudo` command, you will learn more about this in the next section.
 
 ```
-useradd -s /bin/bash -m -d /home/git -c "Running Node" git
-useradd --shell /bin/bash -m -d /home/git -c "Running Node" git
+sudo useradd -s /bin/bash -m -d /home/git -c "Running Node" git
+sudo useradd --shell /bin/bash -m -d /home/git -c "Running Node" git
 ```
 
 We need to learn how this works. Every tool installed includes its own _Manual_ which can be accessed using the `man` command.
@@ -125,16 +159,46 @@ Searching can be carried out using the `/` (forward slash) key followed by the s
 ```
 Notice how the first match is highlighted. There are several matches so we need to cycle through these. There are two ways, either press the **N** key (**shift-N** to move backwards) or type `/` to cycle through. Keep cycling through until you find the entry for the `-s` flag.
 
-### 3.3.1 Test Your Knowledge
+#### 4.1.1 Test Your Knowledge
 
 1. Use the useradd documentation to learn the purpose of all the flags used. Now replace all the short flags with their long equivalent.
 2. Use this knowledge to create yourself a new account.
 3. Now use the `passwd` tool to assign a suitable password (you will need to use the manual!
 4. Log out and then try out your new account to make sure it works.
 
-TODO: SUDO
+### 4.2 Groups
 
-## 4 Package Management
+In this section you will learn about configuring groups in Linux.
+
+#### 4.2.1 Test Your Knowledge
+
+
+### 4.3 File Permissions
+
+#### 4.3.1 Test Your Knowledge
+
+
+### 4.4 Sudo
+
+There are two types of user account, normal and root. Normal accounts can only access specific directories and commands (the standard commands are in the `/bin` directory). These accounts can't cause damage to the overall system and are used for most activities. By default all new accounts are of this type.
+
+There is also a special **root** account which has full system privileges and can be used to damage a system. There are additional commands that only the root user can use, these are located in the `/sbin` directory.
+
+You should _never_ log in as root! But if you can't log in as root how can you install software which requires root privileges? The answer is **sudo**. This is a special group created when Ubuntu was installed. Every user who is a member of the sudo group has special powers! The original account you created when you installed Ubuntu Server has already been added, which is why you were able to create additional user accounts (see previous section).
+
+There are two ways to use sudo. The first is to preceed the command with sudo which will execute that command as root and then return you to ordinary privileges. When you try to run a command using sudo you will be asked for your password. If you don't use it for over 10min it will ask you for your password again.
+
+The second way is to switch to a root account then run the commands without prefixing with sudo by typing `sudo -su`. You will notice that the system prompt switches from a `$` to a `#`. This reminds you that you are logged in as root and should be cautious when running commands. To return to the non-root account you use the `exit` command just like you were trying to log out.
+
+#### 4.4.1 Test Your Knowledge
+
+1. Log in using your new account and try to add a new user. What error do you get?
+2. Log out and then log in using the original account you created when installing the operating system.
+3. Add your new user to the _sudoers_ group using `sudo adduser newusername sudo` remembering to substitute your new username. Because you needed root privileges to do this you needed to add the `sudo` command.
+4. Log out and back in as your new user. Now try to create another user account.
+5. Switch to the root account using `sudo -su` and create another account.
+
+## 5 Package Management
 
 Ubuntu comes with a powerful package management system for installing, configuring, upgrading and removing software called **APT**, the same system used on Debian systems. if you were to work with a Red Hat server you would need to use a different system.
 
@@ -145,7 +209,7 @@ Each package contains all the necessary files and instructions needed for the re
 
 Of the two approaches, the second is best however if the package you want is not hosted in a repository you will need to directly download and install the `.deb` file.
 
-### 4.1 Installing from a Repository
+### 5.1 Installing from a Repository
 
 You will be taken through the process of installing and configuring an Apache web server. Through this you will learn all about repositories and packages.
 
@@ -160,10 +224,10 @@ less /etc/apt/sources/list
 ```
 The `less` command opens up a file for reading. When you have finished viewing, press `q` to quit. Notice that each repository comprises a URL followed by keywords. In the example above, `trusty` refers to the version of Ubuntu, the meaning of the other keywords is: 
 
-- `Main` - Canonical-supported free and open-source software.
-- `Universe` - Community-maintained free and open-source software.
-- `Restricted` - Proprietary drivers for devices.
-- `Multiverse` - Software restricted by copyright or legal issues.
+- `main` - Canonical-supported free and open-source software.
+- `universe` - Community-maintained free and open-source software.
+- `restricted` - Proprietary drivers for devices.
+- `multiverse` - Software restricted by copyright or legal issues.
 
 Before we can install our software we need to download a list of the available packages. You will need to run this with root privileges using the `sudo` command.
 ```
@@ -193,43 +257,38 @@ Installing the package is done using the `apt-get` command. If the `-y` flag is 
 ```
 sudo apt-get install -y apache2
 ```
-The Apache Server package is now installed.
+The Apache Server package is now installed. If you 
 
-## 5 Groups
+#### 5.1.1 Test Your Knowledge
 
-In this section you will learn about configuring groups in Linux.
 
-1. disk partitions
-2. network file systems, mounts.
-3. logs, logcheck.
-2. kernel
-3. connecting using SSH
-4. install packages
-5. user accounts, password aging. disk quotas.
-6. using sudo
-7. file permissions
-8. starting and stopping services, monitoring with top.
-9. environment variables
+## 6 Services
 
-Exercise: build and configure a system to an agreed specification. In the third lab this can be the basis for the Ansible script?
+viewing
 
-## More Advanced
+system performance with top
 
-Perhaps this needs to be in topic 2?
+starting and stopping
 
-Networking and More Linux
+environment variables
 
-1. pipes and redirection
-1. the YAML file format
-2. network IP addresses and ports. Domain names (student get a free domain).
-3. Firewalls: local and remote port forwarding with IP Tables, policy chains.
-4. SSL: concepts, certificates (self signed and third-party) students get free certificate.
-5. shell scripting
-6. Jinja2 templating
-7. authentication options: Kerberos+LDAP/Active Directory.
-8. intrusion detection systems (Network IDS, Snort/Suricata, Kismet, Tripwire)
-9. penetration testing.
-9. cron jobs
-9. system backups with Rsync
+logs
 
-Security?
+2. Enter the `ps` command and press the _return_ key to report on the currently running processes.
+  - Notice that this returns a single row of data with 4 columns:
+
+```
+PID TTY      TIME    CMD
+881 ttys000  0:00.12 -bash
+```
+- PID: The process ID. Each running process has a unique ID.
+- TTY: Teletypewriter. A process that allows user interaction.
+- TIME: How much CPU time the process has been running.
+- CMD: The name of the command that launched the process (we are using the **bash** shell)
+
+### 6.1 Test Your Knowledge
+
+network file systems, mounts.
+
+connecting using SSH
+
