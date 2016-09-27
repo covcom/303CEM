@@ -27,6 +27,20 @@ There are several important terms that need to be carried out when building serv
 3. Orchestration
 4. Configuration Management
 
+# Provisioning
+
+In this exercise you will use a number of tools to automatically provision servers. You will be covering:
+
+1. xxx
+2. xxx
+
+# Deployment
+
+In this exercise you will be using a number of tools to deploy code to a provisioned server. You will be covering:
+
+1. RSync
+2. Vagrant
+
 ## 1 Vagrant
 
 

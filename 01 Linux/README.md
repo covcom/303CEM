@@ -15,9 +15,26 @@ During this module we will be working with **Ubuntu Server** which, at the time 
 
 ### 1.1 Tasks
 
-1. Download and install the latest version of [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads), this was 5.1.4 at the time of writing.
+1. Download and install the latest version of [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads), this was 5.1.4 at the time of writing. If you are working on the lab machines you will not need to complete this step as it is already installed.
 2. Locate the latest LTS release of the [Ubuntu Server Distro](http://www.ubuntu.com/download/server) and download the .iso file.
-3. Create a new Virtual Machine XXXXXXXXXXXXXX
+3. Create a new Virtual Machine following the instructions given.
+4. Install Ubuntu Server 16 LTS keeping a note of the installation choices you made.
+
+### 1.2 Alternative Instructions
+
+If you are having difficulties manually installing Ubuntu in a VirtualBox try these alternative instructions.
+
+1. Open Terminal/Command Line on your host computer.
+2. Create a directory and navigate to it.
+3. Create a VM using Vagrant (you may need to install this first).
+4. Log in using Vagrant SSH.
+
+```
+vagrant init ubuntu/trusty64
+vagrant up
+vagrant ssh
+```
+
 
 ## 2 The Linux Shell
 
@@ -100,9 +117,13 @@ useradd --shell /bin/bash -m -d /home/git -c "Running Node" git
 
 We need to learn how this works. Every tool installed includes its own _Manual_ which can be accessed using the `man` command.
 
-Open the documentation for the `useradd` command by running `man useradd`. This will open the help page.
+Open the documentation for the `useradd` command by running `man useradd`. This will open the help page. Now use the **pg up** and **pg dn** keys to page up and down the documentation page.
 
-Searching 
+Searching can be carried out using the `/` (forward slash) key followed by the search term. Lets find out the purpose of each of the _flags_ used. Type the following:
+```
+/-s
+```
+Notice how the first match is highlighted. There are several matches so we need to cycle through these. There are two ways, either press the **N** key (**shift-N** to move backwards) or type `/` to cycle through. Keep cycling through until you find the entry for the `-s` flag.
 
 ### 3.3.1 Test Your Knowledge
 
@@ -111,6 +132,72 @@ Searching
 3. Now use the `passwd` tool to assign a suitable password (you will need to use the manual!
 4. Log out and then try out your new account to make sure it works.
 
+TODO: SUDO
+
+## 4 Package Management
+
+Ubuntu comes with a powerful package management system for installing, configuring, upgrading and removing software called **APT**, the same system used on Debian systems. if you were to work with a Red Hat server you would need to use a different system.
+
+Each package contains all the necessary files and instructions needed for the required software to work. Packages can be installed in two ways:
+
+1. Downloading the package (this has a `.deb` extension) and installing it using the `dpkg` command
+2. Connecting to a repository that contains lots of packages and installing directly from there.
+
+Of the two approaches, the second is best however if the package you want is not hosted in a repository you will need to directly download and install the `.deb` file.
+
+### 4.1 Installing from a Repository
+
+You will be taken through the process of installing and configuring an Apache web server. Through this you will learn all about repositories and packages.
+
+lets start by looking at the list of repositories we are using. This is stored in a configuration file which, based on your previous knowledge, you would expect to find in the `/etc` directory:
+```
+less /etc/apt/sources/list
+  deb http://archive.ubuntu.com/ubuntu trusty main restricted
+  deb-src http://archive.ubuntu.com/ubuntu trusty main restricted
+  deb http://archive.ubuntu.com/ubuntu trusty-updates main restricted
+  deb-src http://archive.ubuntu.com/ubuntu trusty-updates main restricted
+  deb http://archive.ubuntu.com/ubuntu trusty universe
+```
+The `less` command opens up a file for reading. When you have finished viewing, press `q` to quit. Notice that each repository comprises a URL followed by keywords. In the example above, `trusty` refers to the version of Ubuntu, the meaning of the other keywords is: 
+
+- `Main` - Canonical-supported free and open-source software.
+- `Universe` - Community-maintained free and open-source software.
+- `Restricted` - Proprietary drivers for devices.
+- `Multiverse` - Software restricted by copyright or legal issues.
+
+Before we can install our software we need to download a list of the available packages. You will need to run this with root privileges using the `sudo` command.
+```
+sudo apt-get update
+```
+This will pull a list of the packages down onto your server. Now we can search for the package we need.
+```
+apt-cache search apache
+```
+This will display a long list of result however many of the package names and descriptions don't directly include the string `apache` so we can pipe the output through `grep` to only display lines with this string.
+```
+apt-cache search apache | grep apache
+```
+This output looks better! Unfortunately the list scrolls past the end of the screen. We have already used the `less` command to display a file with the option to page up and down. In typical UNIX fashion we can pipe the output we have through this command.
+```
+apt-cache search apache | grep apache | less
+```
+Now you can use `pg up` and `pg dn` to page up and down the list of packages, press `q` when finished. Using pipes allows you to chain multiple commands together to achieve the required results.
+
+Looking through the packages you should see a one called `apache2`, this looks promising. Before we install we should check the package description and version.
+```
+apt-cache show apache2
+```
+You will need to pagenate the results through `less`, See if you can figure out how to do this on your own.
+
+Installing the package is done using the `apt-get` command. If the `-y` flag is omitted you will be told how much space will be used and asked to confirm installation.
+```
+sudo apt-get install -y apache2
+```
+The Apache Server package is now installed.
+
+## 5 Groups
+
+In this section you will learn about configuring groups in Linux.
 
 1. disk partitions
 2. network file systems, mounts.
