@@ -17,22 +17,21 @@ During this module we will be working with **Ubuntu Server** which, at the time 
 
 1. Download and install the latest version of [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads), this was 5.1.4 at the time of writing. If you are working on the lab machines you will not need to complete this step as it is already installed.
 2. Locate the latest LTS release of the [Ubuntu Server Distro](http://www.ubuntu.com/download/server) and download the .iso file.
-3. Create a new Virtual Machine following the instructions given.
+3. Create a new Virtual Machine following the instructions given in the worksheet on Moodle.
 4. Install Ubuntu Server 16 LTS keeping a note of the installation choices you made.
+5. When the server reboots, log in using the account you created.
+6. Locate the **IP Address** of your server (see note below) and make a note of it.
 
-### 1.2 Alternative Instructions
+#### 1.1.1 Finding the IP Address
 
-If you are having difficulties manually installing Ubuntu in a VirtualBox try these alternative instructions.
+When you boot up your server, the bridged network adapter will connect to the network just like your host and request an IP address from a DHCP server (this will be explained in more detail next week). To connect to your server using SSH you need to know the IP address it has been assigned.
 
-1. Open Terminal/Command Line on your host computer.
-2. Create a directory and navigate to it.
-3. Create a VM using Vagrant (you may need to install this first).
-4. Log in using Vagrant SSH.
-
+To do this you need to log into the server directly and run the `ifconfig` command, this will show you the IP address used by your network adapter. Look for the `enp0s3` adapter and locate the `inet addr` value. In this case it is `192.168.0.34`. Make a note of this.
 ```
-vagrant init ubuntu/trusty64
-vagrant up
-vagrant ssh
+ifconfig
+  enp0s3    Link encap:Ethernet  HWaddr 08:00:27:78:2b:86  
+            inet addr:192.168.0.34  Bcast:192.168.0.255  Mask:255.255.255.0
+            inet6 addr: 2a02:c7d:761e:8b00:a00:27ff:fe78:2b86/64 Scope:Global
 ```
 
 
@@ -57,15 +56,22 @@ The first way is to use automatically-generated key pairs to encrypt the network
 To connect you need to know the server's IP address and the port it is running over (which defaults to port 22). For Mac and Linux clients you run:
 ```
 ssh username@xx.xx.xx.xx
-ssh -p 1234 username@xx.xx.xx.xx
+  The authenticity of host '192.168.0.33 (192.168.0.33)' can't be established.
+  ECDSA key fingerprint is SHA256:A+RnpQ4cwTQUcePW+w6TI4f8o5YAbtOR2wzJciqRigM.
+  Are you sure you want to continue connecting (yes/no)? 
 ```
-Subsitute the correct username and IP address. The second example is if you need to connect over a non-standard port.
+Subsitute the correct username and IP address. The second example is if you need to connect over a non-standard port. 
 
 #### 2.1.2 SSH Authentication
 
 An alternative is to use the key pair to perform authentication instead of typing in a password. The first step it to make sure there is a public and private key generated on the client machine.
 
-On a *NIX machine its located in a hidden directory located in the home directory (`~/.ssh/`). There should be two files, `id_rsa`, the private key and `id_rsa.pub`, the public key. If you are on *NIX there is a special command to achieve this.
+On a *NIX machine its located in a hidden directory located in the home directory (`~/.ssh/`). There should be two files, `id_rsa`, the private key and `id_rsa.pub`, the public key.
+
+Next you need to generate the key pair on the server by logging in and running the `ssh-keygen -t rsa` command. Accept the default options by pressing enter for each question.
+
+
+Finally you need to copy the public key from your host machine to the server. If you are on *NIX there is a special command to achieve this.
 ```
 ssh-copy-id username@xx.xx.xx.xx
 ```
@@ -73,7 +79,7 @@ This will add the client's public key to a list of authorised keys on the server
 ```
 ~/.ssh/authorized_keys
 ```
-If this command is not available you may need to manually copy the public key, log on to the server and paste it into the `authorized_keys` file.
+If this command is not available you may need to manually copy the public key, log on to the server and paste it into the `authorized_keys` file using the **nano** editor.
 
 Once you have done this you should be able to SSH in as normal. the server will authorise using the shared public key and you won't be asked for a password.
 
@@ -257,10 +263,55 @@ Installing the package is done using the `apt-get` command. If the `-y` flag is 
 ```
 sudo apt-get install -y apache2
 ```
-The Apache Server package is now installed. If you 
+The Apache Server package is now installed.
 
-#### 5.1.1 Test Your Knowledge
+### 5.2 Services
 
+A Linux **service** is an application that runs in the background waiting to be used. Examples of this are the SSH server (handles client SSH connections) and the Apache web server you have just installed. 
+
+Each service can be started and stopped and it is easy to see a list of all the currently installed services and whether they are running or not.
+```
+sudo service -- status-all
+  [ + ]  apache2
+  [ - ]  sudo
+  [ + ]  ssh
+  [ ? ]  networking
+```
+There are three possible states:
+- `[ + ]`: the service is running
+- `[ - ]`: the service is stopped
+- `[ ? ]`: the service status is undetermined and is not being controlled by the `service` tool.
+
+You can check for the status of one service:
+```
+sudo service apache2 status
+  * apache2 is running
+```
+The `service` command can be used to start, stop and restart a named service assuming the service is not controlled through a different tool (`[ ? ]`).
+```
+sudo service apache stop
+sudo service apache start
+sudo service apache restart
+```
+
+### 5.3 Service Configuration
+
+Each installed service can be configured. On Linux systems configuration is handled through text files. All configuration files are typically stored in a directory matching the service name in the `/etc/` directory. So for example the apache configuration files are in the directory `/etc/apache2/`.
+
+If you open up this directory you will see several files. The configuration file is called `apache2.conf` and can be viewed using a _terminal pager program_ such as `less` or edited using a _command-line text editor_ such as `nano`. Service configuration files are only writable by users with root privileges.
+```
+less /etc/apache2/apache2.conf
+sudo nano /etc/apache2/apache2.conf
+```
+A service needs to be restarted for any configuration changes to be loaded.
+
+### 5.4 Test Your Knowledge
+
+Your challenge is to install and configure 
+
+### 5.2 Configuration
+
+Each 
 
 ## 6 Services
 
