@@ -194,7 +194,7 @@ You should _never_ log in as root! But if you can't log in as root how can you i
 
 There are two ways to use sudo. The first is to preceed the command with sudo which will execute that command as root and then return you to ordinary privileges. When you try to run a command using sudo you will be asked for your password. If you don't use it for over 10min it will ask you for your password again.
 
-The second way is to switch to a root account then run the commands without prefixing with sudo by typing `sudo -su`. You will notice that the system prompt switches from a `$` to a `#`. This reminds you that you are logged in as root and should be cautious when running commands. To return to the non-root account you use the `exit` command just like you were trying to log out.
+The second way is to switch to a root account then run the commands without prefixing with sudo by typing `sudo -s`. You will notice that the system prompt switches from a `$` to a `#`. This reminds you that you are logged in as root and should be cautious when running commands. To return to the non-root account you use the `exit` command just like you were trying to log out.
 
 #### 4.4.1 Test Your Knowledge
 
@@ -307,23 +307,16 @@ A service needs to be restarted for any configuration changes to be loaded.
 
 ### 5.4 Test Your Knowledge
 
-Your challenge is to install and configure 
+Your challenge is to install and configure ????????
 
-### 5.2 Configuration
 
-Each 
+# Extra Stuff
 
-## 6 Services
-
-viewing
-
-system performance with top
-
-starting and stopping
-
-environment variables
-
-logs
+1. system performance with top
+2. environment variables
+3. logs
+4. processes (see below)
+5. mounting filesystems / network file systems
 
 2. Enter the `ps` command and press the _return_ key to report on the currently running processes.
   - Notice that this returns a single row of data with 4 columns:
@@ -336,10 +329,3 @@ PID TTY      TIME    CMD
 - TTY: Teletypewriter. A process that allows user interaction.
 - TIME: How much CPU time the process has been running.
 - CMD: The name of the command that launched the process (we are using the **bash** shell)
-
-### 6.1 Test Your Knowledge
-
-network file systems, mounts.
-
-connecting using SSH
-
