@@ -317,6 +317,9 @@ Your challenge is to install and configure ????????
 3. logs
 4. processes (see below)
 5. mounting filesystems / network file systems
+6. symlinks
+7. navigation shortcuts (home, current, up)
+8. directories and files (create, delete, touch, edit)
 
 2. Enter the `ps` command and press the _return_ key to report on the currently running processes.
   - Notice that this returns a single row of data with 4 columns:
@@ -329,3 +332,7 @@ PID TTY      TIME    CMD
 - TTY: Teletypewriter. A process that allows user interaction.
 - TIME: How much CPU time the process has been running.
 - CMD: The name of the command that launched the process (we are using the **bash** shell)
+
+### Logs
+
+`/var/logs/`
