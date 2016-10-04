@@ -17,7 +17,7 @@ During this module we will be working with **Ubuntu Server** which, at the time 
 
 1. Download and install the latest version of [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads), this was 5.1.4 at the time of writing. If you are working on the lab machines you will not need to complete this step as it is already installed.
 2. Locate the latest LTS release of the [Ubuntu Server Distro](http://www.ubuntu.com/download/server) and download the .iso file.
-3. Create a new Virtual Machine following the instructions given in the worksheet on Moodle.
+3. Create a new Virtual Machine following the instructions given in the worksheet on Moodle. Make sure you select the **OpenSSH-Server** package from the list.
 4. Install Ubuntu Server 16 LTS keeping a note of the installation choices you made.
 5. When the server reboots, log in using the account you created.
 6. Locate the **IP Address** of your server (see note below) and make a note of it.
