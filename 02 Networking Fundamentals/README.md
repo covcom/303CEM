@@ -104,4 +104,4 @@ and:
 		
 and save the rules when prompted to do so.
 
-###6. Now, if we have set-up a web server on our local VM/web-server machine then we should be able to curl to the external gateway address from outside of your internal private virtual network e.g. from a neighbour’s computer and you should successfully connect to the web server. CONGRATULATIONS! You have now configured a network with a gateway and port forwarding. Think about the arguments provided to “iptables”. Can you identify what they do?
+###6. Now, if we have set-up a web server on our local VM/web-server machine then we should be able to curl to the external gateway address from outside of your internal private virtual network e.g. from a neighbour’s computer and you should successfully connect to the web server. CONGRATULATIONS! You have now configured a network with a gateway and port forwarding. Think about the arguments provided to “iptables”. Can you identify what they do? Have fun :-)
