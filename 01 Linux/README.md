@@ -17,7 +17,7 @@ During this module we will be working with **Ubuntu Server** which, at the time 
 
 1. Download and install the latest version of [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads), this was 5.1.4 at the time of writing. If you are working on the lab machines you will not need to complete this step as it is already installed.
 2. Locate the latest LTS release of the [Ubuntu Server Distro](http://www.ubuntu.com/download/server) and download the .iso file.
-3. Create a new Virtual Machine following the instructions given in the worksheet on Moodle.
+3. Create a new Virtual Machine following the instructions given in the worksheet on Moodle. Make sure you select the **OpenSSH-Server** package from the list.
 4. Install Ubuntu Server 16 LTS keeping a note of the installation choices you made.
 5. When the server reboots, log in using the account you created.
 6. Locate the **IP Address** of your server (see note below) and make a note of it.
@@ -174,15 +174,77 @@ Notice how the first match is highlighted. There are several matches so we need 
 
 ### 4.2 Groups
 
-In this section you will learn about configuring groups in Linux.
+In this section you will learn about configuring groups in Linux. Groups are used to organise collections of users for the purposes of security and access. All files and directories have a user and a group owner. Every user has a group of their own, you will see why in the next section.
 
-#### 4.2.1 Test Your Knowledge
-
+We will start by creating a group called **coventry** to which we will add our three users. 
+```
+groupadd coventry
+usermod -a -G coventry newuser
+members coventry
+```
 
 ### 4.3 File Permissions
 
-#### 4.3.1 Test Your Knowledge
+Access control on a Linux system mirrors that of a UNIX system with each file and directory assigned access rights for:
 
+1. The owner of the file/directory
+2. The group to whom the file/directory belongs
+3. Everybody else
+
+For each of these, there are three possible permissions:
+
+1. Read
+2. Write
+3. Execute
+
+If we combine these we get 9 flags that can be set. if we view a directory using the long listing format flag we can see this information. Here we only show the first file.
+```
+cd /bin
+ls -l
+  -rwxr-xr-x 1 root root 1037528 Jun 24 16:44 bash
+```
+Reading left to right:
+
+1. The first character represents the type, this is either a file (-), a directory (d) or a symbolic link (l).
+2. The next three characters are the owner permissions, read (r), write (w) and execute (x). In this example the owner has all three permissions (`rwx`).
+3. The next three characters are the group permissions that follow the same format as the owner permissions. In this example the group has read and execute permissions (`r-x`).
+4. The last three characters in the block represent the permissions for all other users. In this example all users can read and execute (`r-x`).
+5. Next the username of the owner and group are shown. In this example, because the owner and group are `root`, the file is fully owned by the root account.
+6. The number to the right is the file size in bytes. By using the `-h` flag, these will be displayed in a _human readable format_ such as KB and MB.
+7. After this there is the last modified date and time with the file/directory/symlink name at the end.
+
+#### 4.3.1 Changing Permissions
+
+The owner of the file can change the permissions of any directory/file/symlink they own using the `chmod` command. There are two ways to use this command.
+
+The entire permission set can be assigned:
+```
+chmod 750 myfile
+```
+1. The first digit describes the owner permissions (convert to binary!) as `11` which assigns `rwx`
+2. The second digit describes the group permissions as `101` or `r-x`
+3. The third digit describes the permissions for all other users, in this case `000` or `---`
+
+The alternative is to describe the _change_ you want to make.
+```
+chmod u+x myfle
+```
+1. The first character is the class (u=owner, g=group, o=others, a=all)
+2. The second character is the operator(+ means add and - means remove)
+3. The third character is the mode affected (r=read, w=write, x=execute)
+
+#### 4.3.2 Test Your Knowledge
+
+In these tasks you will be introduced to a number of new commands. before using them make sure you read the `man` pages.
+
+1. As root, create a directory `/home/coventry`.
+2. Set the group of this new directory to your new `coventry` group using the `chgrp` command.
+3. Give your new group read and write permissions but not execute. Make sure this directory is not accessible by anyone not in the group.
+4. Create an empty text file inside this called `readme.md` using the `touch` command.
+5. What are the default permissions on this new file?
+6. Log in as your new user and make sure you can see the directory and file and can edit the file using `nano`.
+7. Create a new user but don't add them to your `coventry` group.
+8. Make sure they can't see the `coventry/` directory.
 
 ### 4.4 Sudo
 
@@ -312,16 +374,20 @@ Your challenge is to install and configure ????????
 
 # Extra Stuff
 
-1. system performance with top
+You now have some understanding of the Linux command line however there are a lot more topics to learn. Spend the rest of your lab time investigating the topics listed below, they will help you with future labs.
+
+1. system performance with `top`
 2. environment variables
 3. logs
-4. processes (see below)
+4. processes with `ps`
 5. mounting filesystems / network file systems
 6. symlinks
-7. navigation shortcuts (home, current, up)
+7. navigation shortcuts (history, home, current, up)
 8. directories and files (create, delete, touch, edit)
 
-2. Enter the `ps` command and press the _return_ key to report on the currently running processes.
+## Processes
+
+Enter the `ps` command and press the _return_ key to report on the currently running processes.
   - Notice that this returns a single row of data with 4 columns:
 
 ```
