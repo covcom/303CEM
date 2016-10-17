@@ -23,7 +23,7 @@ Ensure that all of your VMs are manually assigned ip addresses within the local 
 
 `sudo nano /etc/network/interfaces`
 		
-and add the following text:
+and add the following text. **make sure you don't modify the settings for `enp0S3`**:
 ```
 #The secondary network interface
 auto enp0s8
