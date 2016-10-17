@@ -9,7 +9,7 @@ You will be creating a virtual network of at least three virtual machines (VMs).
  3. Boot it, log in (user root, no password)
  4. run `setup-alpine` (docs here: https://wiki.alpinelinux.org/wiki/Installation). All options are fairly clear, when asked what to use the disk for, say **"sys"**.
  5. Check your network works. `ping bbc.co.uk`
- 6. Learn **Emacs**. You don't have to, but it makes you a better person.
+ 6. Install the nano editor `apk add nano`
 
 ## 1. Clone your existing ubuntu VM in VirtualBox:
 
