@@ -11,7 +11,9 @@ You will be creating a virtual network of at least three virtual machines (VMs).
 4. select the “clone” button and wait.
 5. A new VM will appear in the list.
 
-## 2. Make sure that your machine identified as web server has a web server installed and running (You will be able to browse or curl successfully to the web server’s internal IP address from another internal VM). If this does not work then a web server will have to be installed on the web server computer. If there is no active web server then install “nginx”:
+## 2 Install a Web Server
+
+Make sure that your machine identified as web server has a web server installed and running (You will be able to browse or curl successfully to the web server’s internal IP address from another internal VM). If this does not work then a web server will have to be installed on the web server computer. If there is no active web server then install “nginx”:
 
 `sudo apt-get install nginx`
 
