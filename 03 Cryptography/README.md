@@ -100,7 +100,7 @@ In this task, we will implement a TCP client and TCP server, which are connected
 
 `OpenSSL` has implemented the SSL protocol that can be used to achieve the above goals. You can use `OpenSSL`’s SSL functions directly to make an SSL connection between the client and the server, in which case, the verification of certificates will be automatically carried out by the SSL functions. There are many online tutorials on these SSL functions, so we will not give another one here. The followings are a few tutorials that are useful for this lab. These tutorials are also linked in the web page of this lab.
 
-- OpenSSL examples: http://www.rtfm.com/openssl-examples/
+- OpenSSL examples: https://www.ibm.com/developerworks/library/l-openssl/
 - http://www.ibm.com/developerworks/linux/library/l-openssl.html
 
 We provide two example programs, `cli.cpp` and `serv.cpp`, in a file demo `openssl api.tar.gz`, to help you to understand how to use `OpenSSL` API to build secure TCP connections. The file can be down- loaded from the lab’s web page. The programs demonstrate how to make SSL connections, how to get peer’s certificate, how to verify certificates, how to get information out of certificates, etc. To make the program work, you have to untar it first and run make command. We have included the password for the server and client in the README file. You can use these programs as the basis to finish this task.
