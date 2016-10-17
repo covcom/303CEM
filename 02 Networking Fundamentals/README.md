@@ -33,15 +33,15 @@ network 192.168.56.0		#and remember it for configuring the other computerss
 broadcast 192.168.56.255
 gateway 192.168.56.103
 ```	
-Write out to file (save file) then restart the network service (it's probably just as easy to reboot the server). For the remaining VMs we can edit the "interfaces" file in a similar way to the above but we require only one network adapter on each of these machines (likely to be identified as "enp0s8"). So on each machine enter the following and make sure that you have different IP addresses on each machine within the network address range (192.168.56.101, 192.168.56.102, 192.168.56.103 etc.):
+Write out to file (save file) then restart the network service using `sudo ifconfig enp0s8 down` followed by `sudo ifconfig enp0s8 up` ( or you could just reboot the server using `sudo shutdown -r now`). For the remaining VMs we can edit the "interfaces" file in a similar way to the above but we require only one network adapter on each of these machines (likely to be identified as "enp0s3"). So on each machine enter the following and make sure that you have different IP addresses on each machine within the network address range (192.168.56.101, 192.168.56.102, 192.168.56.103 etc.):
 
 `sudo nano /etc/network/interfaces`
 		
 and alter the text to the following:
 ```
 #The primary network interface
-auto enp0s8
-iface enp0s8 inet static
+auto enp0s3
+iface enp0s3 inet static
 address 192.168.56.xxx		#replace xxx with appropriate numbers such as 101, 102 etc.
 network 192.168.56.0
 broadcast 192.168.56.255
