@@ -5,7 +5,7 @@ The development of this document is/was funded by three grants from the US Natio
 
 ## 1 Overview
 
-The learning objective of this lab is for students to get familiar with the concepts in the Public-Key encryp- tion and Public-Key Infrastructure (PKI). After finishing the lab, students should be able to gain a first-hand experience on public-key encryption, digital signature, public-key certificate, certificate authority, authen- tication based on PKI. Moreover, students will be able to use tools and write programs to create secure channels using PKI.
+The learning objective of this lab is for students to get familiar with the concepts in the Public-Key encryption and Public-Key Infrastructure (PKI). After finishing the lab, students should be able to gain a first-hand experience on public-key encryption, digital signature, public-key certificate, certificate authority, authentication based on PKI. Moreover, students will be able to use tools and write programs to create secure channels using PKI.
 
 ## 2 Lab Environment
 
