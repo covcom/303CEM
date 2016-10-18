@@ -3,7 +3,7 @@
 
 You will be creating a virtual network of at least three virtual machines (VMs). One VM should be identified as a gateway and another should be identified as a web server.
 
- 1. Download [Alpine](http://dl-cdn.alpinelinux.org/alpine/v3.4/releases/x86_64/alpine-extended-3.4.4-x86_64.iso)
+ 1. Download [Alpine](https://alpinelinux.org/downloads/)
  4. Create a NAT Network in virtualbox (preferences, networking)
  2. Create a VM and connect the Alpine ISO as the CD drive, networking as "NAT Networking" assciated with the network you set up in the previous task
  3. Boot it, log in (user root, no password)
