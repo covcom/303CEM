@@ -1,3 +1,6 @@
+http://computing.coventry.ac.uk/~james/part1.flv
+
+http://computing.coventry.ac.uk/~james/part2.flv
 
 # Networking Fundamentals - Building virtual networks with a gateway
 
