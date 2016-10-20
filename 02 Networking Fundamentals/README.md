@@ -1,6 +1,21 @@
 
 # Networking Fundamentals - Building virtual networks with a gateway
 
+## Extended Instructions (Latest)
+
+Download the base iso image of the [Alpine](https://alpinelinux.org/downloads/) distro and use this to build a new VirtualBox image.
+
+- Type Linux/Other Linux 64bit
+- 512MB RAM
+- 1GB HDD
+- Adapter 1: internal
+- Adapter 2: NAT
+
+log in with the `root` username (there is no password, then run the `setup-alpine` command.
+
+- use the defaults for most options.
+- choose the sda disk and use it as **sys**.
+
 You will be creating a virtual network of at least three virtual machines (VMs). One VM should be identified as a gateway and another should be identified as a web server.
 
  1. Download [Alpine](https://alpinelinux.org/downloads/)
