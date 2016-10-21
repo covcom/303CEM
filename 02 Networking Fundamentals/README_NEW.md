@@ -1,6 +1,14 @@
 
 # Linux (Alpine)
 
+This lab takes you through the process of creating a virtual network using Linux. By the end of the lab you will have a gateway server and a private server.
+
+There is a video tutorial in two parts that covers this lab.
+```
+http://computing.coventry.ac.uk/~james/part1.flv
+http://computing.coventry.ac.uk/~james/part2.flv
+```
+
 ## Building a Gateway Server
 
 In this task you will use the Alpine Linux image to build a gateway server which will have two network interfaces. The first (eth0) will be connected to the internal network whilst the other (eth1) will connect to the outside world. It will hand out IP addresses and other settings to the hosts on the internal network and will pass traffic from the internal network to the external one using Network Address Translation (NAT).
@@ -175,6 +183,11 @@ Notice is passes traffic through `10.5.5.1` which is the internal interface of o
 ping 10.5.5.1
 ping 8.8.8.8
 ping bbc.co.uk
+```
+
+Congratulations. You now have a fully functional virtual network. You can download the completed exercise if you experienced any problems.
+```
+http://computing.coventry.ac.uk/~mtyers/Servers.zip
 ```
 
 ## Additional Instructions (Not Verified)
