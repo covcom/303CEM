@@ -1,16 +1,15 @@
 
-Assumed knowledge by this stage:
+# Software Deployment
 
-1. the YAML file format
-2. connecting using SSH
-3. pipes and redirection
-4. install packages
-5. using sudo
-6. file permissions
-7. starting and stopping services
-8. environment variables
-9. shell scripting
-10. Jinja2 templating
+In this lab you will learn a variety of techniques that can be used to deploy software to live servers. This is an important skill and if correctly configured will allow your development team to deploy software updates with a minimum of fuss. In these examples you will be deploying a simple API that implements a to do list.
+
+You already have a working virtual network which you created in the second lab. If this is no longer available or no longer working you can [download](http://computing.coventry.ac.uk/~mtyers/Servers.zip) a fresh version and use it in this tutorial, you should log in as `root` with a password of `raspberry`. To simulate deploying software from within the _internal network_ you will also need to download a virtualised desktop Linux operating system and run this as a VM inside the internal network.
+
+## Configuring Git
+
+In these exercises it is assumed that the development team is managing their codebase using the Git version control system so the first task is to configure the development machine. Start by logging (the password is `raspberry`) and installing the `git`
+ tools. Once these are installed you need to clone the repository that contains the API.
+
 
 # Automating Server Builds
 
