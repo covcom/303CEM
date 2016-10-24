@@ -248,6 +248,14 @@ As a simple test install `curl` on your gateway and try connecting to the client
 ```
 apk add curl
 curl 10.5.5.2
+  <html>
+  <head>
+  <title>Hello World</title>
+  </head>
+  <body>
+  <h1>Hello World</h1
+  </body>
+  </html>
 ```
 
 Congratulations, you now have a functioning web server running on the client! The **External** server is not on the internal network so can only see the gateway server. Install `curl` and try connecting to the gateway.
@@ -320,6 +328,19 @@ The return communication from the private VM/web server needs to be pointed back
 
 `iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
 
+If you try to `curl` the gateway IP your request will be routed to the client web server and the html document will be routed back.
+```
+curl 10.0.2.4
+  <html>
+  <head>
+  <title>Hello World</title>
+  </head>
+  <body>
+  <h1>Hello World</h1
+  </body>
+  </html>
+```
+
 Additionally you will want to allow for outbound browsing from the network so add these rules too:
 
 ```
@@ -347,5 +368,7 @@ At the moment, all these settings will be lost if the server is stopped or reboo
 To load the configuration at boot you need to save it to disk and then set up IP Tables to start on reboot.
 ```
 /etc/init.d/iptables save
+   * Saving iptables state ...
 rc-update add iptables
+   * service iptables added to runlevel default
 ```
