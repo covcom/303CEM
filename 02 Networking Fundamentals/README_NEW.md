@@ -248,6 +248,14 @@ As a simple test install `curl` on your gateway and try connecting to the client
 ```
 apk add curl
 curl 10.5.5.2
+  <html>
+  <head>
+  <title>Hello World</title>
+  </head>
+  <body>
+  <h1>Hello World</h1
+  </body>
+  </html>
 ```
 
 Congratulations, you now have a functioning web server running on the client! The **External** server is not on the internal network so can only see the gateway server. Install `curl` and try connecting to the gateway.
@@ -300,25 +308,38 @@ There are behaviours that modify the default behaviour for each of the three typ
 
 ### Setting up the IPTables
 
-We create a forward chain rule which _accepts port 80 connections on the public interface_ `enp0s3` `eth1` and passes them to the private interface `enp0s8` `eth0`. This first rule allows the first packet of a connection request:
+We create a forward chain rule which _accepts port 80 connections on the public interface_ `eth1` and passes them to the private interface `eth0`. This first rule allows the first packet of a connection request:
 
-`sudo iptables -A FORWARD -i eth1 -o eth0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
+`iptables -A FORWARD -i eth1 -o eth0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
 
 Next we allow subsequent packet exchanges subsequent to the initial connection request:
 
-`sudo iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
 and:
 
-`sudo iptables -A FORWARD -i eth0 -o eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`iptables -A FORWARD -i eth0 -o eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
 Now we have to set-up the routing rules for NAT so that the port 80 requests are mapped to our **Client** private VM which is configured as a web server (substitute the IP address for `10.5.5.2` below):
 
-`sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to-destination 10.5.5.2`
+`iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to-destination 10.5.5.2`
 
 The return communication from the private VM/web server needs to be pointed back to the gateway internal address as the inward communication packets currently have a return address outside of our local network (substitute your gateway internal address for 192.168.56.103 in the following):
 
-`sudo iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
+`iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
+
+If you try to `curl` the gateway IP your request will be routed to the client web server and the html document will be routed back.
+```
+curl 10.0.2.4
+  <html>
+  <head>
+  <title>Hello World</title>
+  </head>
+  <body>
+  <h1>Hello World</h1
+  </body>
+  </html>
+```
 
 Additionally you will want to allow for outbound browsing from the network so add these rules too:
 
@@ -328,9 +349,19 @@ iptables -A INPUT -i eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCE
 iptables -A OUTPUT -o eth0 -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --sport 443 -m state --state ESTABLISHED -j ACCEPT
 ```
-Finally you can list all the IPTables with `iptables -L`.
+Finally you can list all the IPTables with `iptables -L` (note not showing the outbound browsing entries).
 ```
-xxx
+iptables -L
+  Chain INPUT (policy accept)
+    target     prot opt source      destination
+  
+  Chain FORWARD (policy accept)
+    target     prot opt source      destination
+    ACCEPT     tcp  --  anywhere    anywhere       tcp dpt:http flags:FIN,SYN,RST,ACK/SYN ctstate NEW
+    ACCEPT     all  --  anywhere    anywhere       ctstate RELATED,ESTABLISHED
+    ACCEPT     all  --  anywhere    anywhere       ctstate RELATED,ESTABLISHED
+  Chain OUTPUT (policy accept)
+    target     prot opt source      destination
 ```
 
 ### Testing
@@ -347,5 +378,28 @@ At the moment, all these settings will be lost if the server is stopped or reboo
 To load the configuration at boot you need to save it to disk and then set up IP Tables to start on reboot.
 ```
 /etc/init.d/iptables save
+   * Saving iptables state ...
 rc-update add iptables
+   * service iptables added to runlevel default
+```
+
+### Deleting Rules
+
+Sometimes you will make a mistake adding a new rule. To delete a rule you should first list the rules with line numbers.
+```
+sudo iptables -L --line-numbers
+  Chain INPUT (policy accept)
+    num  target     prot opt source      destination
+  
+  Chain FORWARD (policy accept)
+    num  target     prot opt source      destination
+    1    ACCEPT     tcp  --  anywhere    anywhere       tcp dpt:http flags:FIN,SYN,RST,ACK/SYN ctstate NEW
+    2    ACCEPT     all  --  anywhere    anywhere       ctstate RELATED,ESTABLISHED
+    3    ACCEPT     all  --  anywhere    anywhere       ctstate RELATED,ESTABLISHED
+  Chain OUTPUT (policy accept)
+    num  target     prot opt source      destination
+```
+To delete a rule you need to note the **chain** and **line number**. For example to delete the third rule in the **FORWARD** chain.
+```
+iptables -D FORWARD 3
 ```
