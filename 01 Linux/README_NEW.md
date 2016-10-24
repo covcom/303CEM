@@ -162,6 +162,20 @@ visudo
 poweroff
   restart the server
 ```
+Now we can SSH into the server. needs setting up as follows:
+
+find the server IP address.
+
+Settings > Networking > Adapter 1
+
+NAT
+
+Advanced settings > Port Forwarding > add new rule
+```
+Name  Protocol  Host IP    Host Port   Guest IP   Guest Port
+SSH   TCP       127.0.0.1  2200        10.0.2.15  22
+```
+Now you can SSH into the server from the host.
 
 ```
 sudo useradd -s /bin/bash -m -d /home/git -c "Running Node" git
