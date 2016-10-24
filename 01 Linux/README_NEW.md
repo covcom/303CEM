@@ -151,11 +151,30 @@ In this section you will learn abount how access control is managed through the 
 By default, Linux is a multi-user system. In this section you will learn how to create new user accounts. This is done using the `useradd` command. Here is the command to add a new user, notice the use of **flags** such as `-s` to specify different options. Flags come in two styles, long and short. Short flags have a single `-` and comprise a single character whilst long flags start with `--` and are multi-character. The two examples below are functionally the same. Don't worry about the `sudo` command, you will learn more about this in the next section.
 
 ```
+Alpine Linux
+adduser newuser
+passwd newuser
+adduser newuser sudo
+
+visudo
+  add the following or uncomment then save
+  %sudo ALL=(ALL) ALL
+poweroff
+  restart the server
+```
+
+```
 sudo useradd -s /bin/bash -m -d /home/git -c "Running Node" git
 sudo useradd --shell /bin/bash -m -d /home/git -c "Running Node" git
 ```
 
 We need to learn how this works. Every tool installed includes its own _Manual_ which can be accessed using the `man` command.
+
+Alpine Linux does not come with the man pages installed, you will have to install this before use. Some man pages will be installed automaticaly but others need to be installed before use (to save space). In this example we install the documentation for `curl`.
+```
+apk add man man-pages mdocml-apropos
+apk add curl-doc
+```
 
 Open the documentation for the `useradd` command by running `man useradd`. This will open the help page. Now use the **pg up** and **pg dn** keys to page up and down the documentation page.
 
