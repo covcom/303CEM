@@ -185,48 +185,140 @@ ping 8.8.8.8
 ping bbc.co.uk
 ```
 
-Congratulations. You now have a fully functional virtual network. You can download the completed exercise if you experienced any problems.
+Congratulations. You now have a fully functional virtual network. You can download the completed exercise if you experienced any problems. You need to log into the servers using the `root` account with a password of `raspberry`.
+
 ```
 http://computing.coventry.ac.uk/~mtyers/Servers.zip
 ```
 
-## Additional Instructions (Not Verified)
+### Configuring a Web Server
 
-Confirm the network interfaces within the VM by typing:
+Open the network settings for the Gateway server and change Adapter 2 from **NAT** to **NAT Network**.
 
-`ip -4 addr show scope global`.
-		
-There should be two interfaces with network address ranges so identify the public routing interface by typing:
+Create a new linked clone of the **Alpine** server (the master), call it **External**, don't forget to re-initialize the MAC address! Configure the first adapter as **NAT Network** and boot the server. This will be outside the private network and will be used to test our gateway.
 
-`ip route show | grep default`
-		
-Turn on port forwarding for this session on the gateway machine:
+Use `ifconfig` to make sure it has an IP address in this example it was `10.0.2.5`. Also make a record of the IP address of the gateway's external network interface `eth1`. in this case it was `10.0.2.4`. Try pinging the _gateway_ from the new _external_ server, this shound work.
 
-`echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward`
+### Installing the Web Server
 
-## 5. Setting up the Firewall
+We will set up the **Client** as a web server by installing and configuring **NGINX**.
+```
+apk add nginx
+mkdir /data
+mkdir /data/www
+nano /data/www/index.html
+```
+Add a simple html web page and save.
+```
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h1>Hello World</h1>
+  </body>
+</html>
+```
+Now edit the configuration file `/etc/nginx/nginx.conf` in nano. Delete the default one and create a new one.
+```
+rm /etc/nginx/nginx.conf
+nano /etc/nginx/nginx.conf
+```
+Create a simple configuration.
+```
+events {
 
-“iptables” is in essence a firewall that is normally an integral part of a linux distro, this will need to be configured on the **gateway server**.
+}
 
-We create a forward chain rule which _accepts port 80 connections on the public interface_ `enp0s3` and passes them to the private interface `enp0s8`. This first rule allows the first packet of a connection request:
+http {
+    server {
+        location / {
+            root /data/www;
+        }
+    }
+}
+```
+Now start nginx and reload the configuration with `nginx -s reload`.
+```
+mkdir /run/nginx
+sudo service nginx start
+nginx -s reload
+```
+As a simple test install `curl` on your gateway and try connecting to the client's IP address (in this case it was `10.5.5.2`)
+```
+apk add curl
+curl 10.5.5.2
+```
 
-`sudo iptables -A FORWARD -i enp0s3 -o enp0s8 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
+Congratulations, you now have a functioning web server running on the client! The **External** server is not on the internal network so can only see the gateway server. Install `curl` and try connecting to the gateway.
+```
+curl 10.0.2.4
+  curl: (7) Failed to connect to 10.0.2.4 port 80: Connection refused.
+```
+In the next section we will configure the gateway to pass all requests to the gateway server on port 80 to our web server running on the internal network.
+
+## Configuring the Firewall
+
+Now we have a simple network we can learn about how to configure a firewall. iptables is a command-line firewall utility that uses policy chains to allow or block traffic. When a connection tries to establish itself on your system, iptables looks for a rule in its list to match it to. If it doesn’t find one, it resorts to the default action. Earler we installed the `iptables` tools.
+
+### Port Forwarding
+
+Port forwarding uses network address translation to redirect a request from one address and port to a different address and port. This is needed to allow servers sitting on a private network to be accessible from outside this network. By default port forwarding is switched off. To enable it you need to create a config file and simply store `1` in it.
+
+`echo 1 > /proc/sys/net/ipv4/ip_forward`
+
+Job done.
+
+### Setting up the Firewall
+
+Now we will use the `iptables` command to configure the firewall. Start by listing the current rules using `iptables -L`.
+```
+iptables -L
+  Chain INPUT (policy accept)
+  target     prot opt source      destination
+  Chain FORWARD (policy accept)
+  target     prot opt source      destination
+  Chain OUTPUT (policy accept)
+  target     prot opt source      destination
+```
+
+There are three types of chain:
+
+1. `INPUT` - used to control the behavour of _incoming_ connections
+2. `FORWARD` - used to control incoming connections that need to be _passed on_ to other servers
+3. `OUTPUT` - used to control the behaviour of _outgoing_ connections.
+
+As you can see, there are currently no rules in place.
+
+### Policies
+
+There are behaviours that modify the default behaviour for each of the three types of chain. The default is `accept` which means the system accepts connections be default. The three options are:
+
+1. `accept` - allow connections unless specified (blacklisting)
+2. `drop` - drop the connection without notifying the client (whitelisting)
+3. `reject` - drop the connection and return an error (whitelisting)
+
+### Setting up the IPTables
+
+We create a forward chain rule which _accepts port 80 connections on the public interface_ `enp0s3` `eth1` and passes them to the private interface `enp0s8` `eth0`. This first rule allows the first packet of a connection request:
+
+`sudo iptables -A FORWARD -i eth1 -o eth0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
 
 Next we allow subsequent packet exchanges subsequent to the initial connection request:
 
-`sudo iptables -A FORWARD -i enp0s3 -o enp0s8 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`sudo iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
 and:
 
-`sudo iptables -A FORWARD -i enp0s8 -o enp0s3 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`sudo iptables -A FORWARD -i eth0 -o eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
-Now we have to set-up the routing rules for NAT so that the port 80 requests are mapped to one of the private VMs which will act as a web server (substitute the IP address for 192.168.56.102 below):
+Now we have to set-up the routing rules for NAT so that the port 80 requests are mapped to our **Client** private VM which is configured as a web server (substitute the IP address for `10.5.5.2` below):
 
-`sudo iptables -t nat -A PREROUTING -i enp0s3 -p tcp --dport 80 -j DNAT --to-destination 192.168.56.102`
+`sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to-destination 10.5.5.2`
 
 The return communication from the private VM/web server needs to be pointed back to the gateway internal address as the inward communication packets currently have a return address outside of our local network (substitute your gateway internal address for 192.168.56.103 in the following):
 
-`sudo iptables -t nat -A POSTROUTING -o enp0s8 -p tcp --dport 80 -d 192.168.56.102 -j SNAT --to-source 192.168.56.103`
+`sudo iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
 
 Additionally you will want to allow for outbound browsing from the network so add these rules too:
 
@@ -236,17 +328,24 @@ iptables -A INPUT -i eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCE
 iptables -A OUTPUT -o eth0 -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -i eth0 -p tcp --sport 443 -m state --state ESTABLISHED -j ACCEPT
 ```
+Finally you can list all the IPTables with `iptables -L`.
+```
+xxx
+```
 
-If you want to save these iptables rules so that they will be run on restart of the gateway VM then install iptables-persistent:
+### Testing
 
-`sudo apt-get install iptables-persistent`
+To test these settings:
 
-and save the rules when prompted to do so.
+1. try to curl the gateway server IP from the External server
+2. make sure you can reach the Internet from your Client server.
 
-## 6 Check the Connectivity
+### Starting the IP Tables on Boot
 
-Now, if we have set-up a web server on our local VM/web-server machine then we should be able to `curl` to the external gateway address from outside of your internal private virtual network e.g. from a neighbour’s computer and you should successfully connect to the web server.
+At the moment, all these settings will be lost if the server is stopped or rebooted.
 
-CONGRATULATIONS! You have now configured a network with a gateway and port forwarding. Think about the arguments provided to `iptables`. Can you identify what they do?
-
-Have fun :-)
+To load the configuration at boot you need to save it to disk and then set up IP Tables to start on reboot.
+```
+/etc/init.d/iptables save
+rc-update add iptables
+```
