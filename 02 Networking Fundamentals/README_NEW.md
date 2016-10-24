@@ -302,23 +302,23 @@ There are behaviours that modify the default behaviour for each of the three typ
 
 We create a forward chain rule which _accepts port 80 connections on the public interface_ `enp0s3` `eth1` and passes them to the private interface `enp0s8` `eth0`. This first rule allows the first packet of a connection request:
 
-`sudo iptables -A FORWARD -i eth1 -o eth0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
+`iptables -A FORWARD -i eth1 -o eth0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT`
 
 Next we allow subsequent packet exchanges subsequent to the initial connection request:
 
-`sudo iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
 and:
 
-`sudo iptables -A FORWARD -i eth0 -o eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
+`iptables -A FORWARD -i eth0 -o eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT`
 
 Now we have to set-up the routing rules for NAT so that the port 80 requests are mapped to our **Client** private VM which is configured as a web server (substitute the IP address for `10.5.5.2` below):
 
-`sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to-destination 10.5.5.2`
+`iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 80 -j DNAT --to-destination 10.5.5.2`
 
 The return communication from the private VM/web server needs to be pointed back to the gateway internal address as the inward communication packets currently have a return address outside of our local network (substitute your gateway internal address for 192.168.56.103 in the following):
 
-`sudo iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
+`iptables -t nat -A POSTROUTING -o eth0 -p tcp --dport 80 -d 10.5.5.2 -j SNAT --to-source 10.5.5.1`
 
 Additionally you will want to allow for outbound browsing from the network so add these rules too:
 
