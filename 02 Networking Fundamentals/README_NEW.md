@@ -94,6 +94,8 @@ The gateway server will need a second network card to communicate with the inter
 
 Return to the first Interface and change it to **Internal**.
 
+**NOTE: The image below is wrong as this should be the configuration of Adapter 1 of the Gateway server**
+
 ![Cloning the Server](.images/step09.png)
 
 Boot up the Gateway server and log in. Network configuration is stored in the `/etc/network/interfaces` file so this needs to be loaded in the `nano` editor.
