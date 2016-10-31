@@ -10,9 +10,31 @@ Boot up your Gateway server and make sure both the gateway tools and the dhcp se
 sh startGateway
 dhcp -4 -f -d -cf ./dhcpd.conf --no-pid eth0
 ```
-In this lab you will be running debian servers, these use the same package manager as Ubuntu but the server takes up a much smaller footprint. You can download the base VirtualBox Ubuntu image from: xxxxxx.
+In this lab you will be running debian servers, these use the same package manager as Ubuntu but the server takes up a much smaller footprint. You can download the base VirtualBox Ubuntu image from: http://computing.coventry.ac.uk/~mtyers/Debian_Server.zip.
 
-You will also need a virtualised linux desktop OS which will be used as the development machine. You can download a VirtualBox image for a basic Debian Desktop OS from xxxxxx.
+You will also need a virtualised linux desktop OS which will be used as the development machine. You can download a VirtualBox image for a basic Debian Desktop OS from http://computing.coventry.ac.uk/~mtyers/Debian_Desktop.zip.
+
+You have the opportunity to use these private servers to try out the concepts covered in the lecture:
+
+1. Mounting File Systems
+2. File Transfer Protocol (FTP)
+3. Secure Shell
+4. Rsync
+5. Environment Variables
+6. Shell Scripts
+7. Cron
+
+## Configuring Git
+
+In these exercises it is assumed that the development team is managing their codebase using the Git version control system so the first task is to configure the _development machine_. Install `git` tools. Once these are installed you need to clone the repository that contains the API.
+```
+sudo apt-get update
+sudo apt-get install git -y
+git clone https://github.com/covcom/todo.git
+ls
+```
+This will clone the API code into a new directory called `todo`. Open the todo directory in Visual Studio Code (File > Open, then select the Developer Home directory.) Take a moment to look at the files you have cloned. In the next sections you will learn how to deploy this code using three different techniques:
+
 
 ## Mounting File Systems
 
@@ -56,7 +78,7 @@ Switch to the `root` account using `su root`, the password is `raspberry`. As ro
 ```
 showmount -e 10.5.5.9
   Export list for 10.5.5.9:
-    /home/backup *
+    /home/backup *(rw,sync)
 ```
 The share we created is listed. Now we can mount this.
 ```
@@ -74,7 +96,7 @@ fuser -vm /mnt/backup
 umount /mnt/backup
 ```
 
-It looks like the client only has read-access to the remote directory. To fix this you will need to modify the configuration `/etc/exports` file on the **fileserver**.
+It looks like all internal servers have access to the remote directory. To fix this you will need to modify the configuration `/etc/exports` file on the **fileserver**. Here we restrict access to server `10.5.5.10`.
 ```
 /home/backup     10.5.5.10(rw,sync)
 ```
@@ -102,140 +124,31 @@ rm vscode.deb
 ```
 This will install Visual Studio Code. You can launch it by clicking on the menu and searching for _Visual Studio Code_.
 
-## Configuring Git
-
-In these exercises it is assumed that the development team is managing their codebase using the Git version control system so the first task is to configure the development machine. Install `git` tools. Once these are installed you need to clone the repository that contains the API.
-```
-sudo apt-get update
-sudo apt-get install git -y
-git clone https://github.com/covcom/todo.git
-ls
-```
-This will clone the API code into a new directory called `todo`. Open the todo directory in Visual Studio Code (File > Open, then select the Developer Home directory.) Take a moment to look at the files you have cloned. In the next sections you will learn how to deploy this code using three different techniques:
-
-1. Secure file transfer protocol (SFTP).
-2. RSync
-3. Git push.
-
 ## SFTP
 
 Create a linked clone of the master Alpine server. Make sure you reset the MAC address and call the server SFTP Server. This should be on the internal network. Check the connectivity as before.
 
-
-# Automating Server Builds
-
-By now you will have learned the concepts, tools and techniques needed to build servers. This was achieved by completing a sequence of steps which needed to be done in a particular order. You may also have discovered that we as humans are slow at completing the tasks and often make mistakes.
-
-You have only bee working on one server at a time but in real life you might need to configure 10 or even 100 servers!
-
-In this worksheet you will learn how to use a range of tools that can automate this process and even carry it out in parallel!
-
-There are several important terms that need to be carried out when building servers:
-
-1. Provisioning
-2. Deployment
-3. Orchestration
-4. Configuration Management
-
-# Provisioning
-
-In this exercise you will use a number of tools to automatically provision servers. You will be covering:
-
-1. xxx
-2. xxx
-
-# Deployment
-
-In this exercise you will be using a number of tools to deploy code to a provisioned server. You will be covering:
-
-1. RSync
-2. Vagrant
-
-## 1 Vagrant
-
-
-
-Search for Vagrant boxes at https://atlas.hashicorp.com/boxes/search enter a search term. Ubuntu 16 is called xenial
-
+Install the `vsftpd` package and open the `/etc/vsftpd.conf` configuration file in `nano`. Use the following typical settings.
 ```
-vagrant init ubuntu/trusty64
-vagrant up
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+file_open_mode=750
+local_umask=022
+chroot_local_user=YES
+user_sub_token=$USER
+local_root=/home/$USER/public_html
+listen=YES
 ```
+File permissions are controlled using two configuration values
 
-Vagrant includes a SSH client that can be used to connect to the VM.
+- file_open_mode: the permissions applied to the file
+- local_unmask: the permissions removed from the file
+
+Note that the user won't be able to save files in their home folder which is a security feature implemented by vsftpd. This is why we have specified a directory called `public_html`, notice the use of an **environment variable** to create the correct path based on the username.
+
+After updating the configuration file you will need to restart the service using one of the following commands.
 ```
-vagrant ssh
-```
-
-Sometimes (for example when we want to automate our deployment using Ansible) we need to be able to connect using a standard SSH client. To do this we need to find the SSH connection details. This will print out a lot of information, only the relevent lines are reproduced below:
-```
-vagrant ssh-config
-  HostName 127.0.0.1
-  User vagrant
-  Port 2222
-  IdentityFile "/path/to/private_key"
-```
-We can now use this information to connect using an SSH client.
-```
-ssh vagrant@127.0.0.1 -p 2222 -i "/path/to/private_key"
-```
-
-Synced folders
-
-```
-config.vm.synced_folder "./src", "/home/vagrant/src", create: true
-```
-
-
-
-### 1.1 Provisioning
-
-Instead of manually installing software, Vagrant has support for **provisioning** which enables it to automatically install the correct software when the server is created. In this example we will be creating a simple Apache web server. Open the `ftp/` directory and study the directory structure and files.
-```
-.
-├── Vagrantfile
-├── bootstrap.sh
-└── src
-    └── html
-        └── index.html
-```
-
-
-
-```
-# USEFUL BASH COMMANDS
-
-service --status-all
-service apache2 status
-hostname -I (gets the IP address)
-
-# USEFUL VAGRANT COMMANDS
-
-# power up the server and run the Vagrantfile script.
-vagrant up 
-
-# check status of vagrant box
-vagrant status
-vagrant ssh-config
-
-# SSH into the server using vagrant
-vagrant ssh
-
-# find the SSH connection details
-vagrant ssh-config
-
-# SSH into the server using terminal
-ssh vagrant@127.0.0.1 -p 2222 -i ".vagrant/machines/default/virtualbox/private_key"
-
-# stop the vagrant box
-vagrant halt
-
-# terminate virtual machine
-vagrant destroy
-
-# if the guest machine is already running, the provision step can be run without needing to rebuild.
-vagrant reload --provision
-
-# upgrade to latest version of Ubuntu server
-do-release-upgrade
+service nfs-kernel-server restart
+/etc/init.d/vsftpd restart
 ```
