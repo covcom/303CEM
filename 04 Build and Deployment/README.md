@@ -152,3 +152,38 @@ After updating the configuration file you will need to restart the service using
 service nfs-kernel-server restart
 /etc/init.d/vsftpd restart
 ```
+
+## SSH
+
+You are already familiar with the use of SSH to connect to and authenticate against a server. Clone a third Debian server called **SSH Server**.
+
+Make sure you have a pair of SSH keys by running the `ssh-keygen` command and providing a _blank password_. Check that these have been generated in the default location.
+```
+tree ~/.ssh
+/home/testuser/.ssh
+├── id_rsa
+├── id_rsa.pub
+└── known_hosts
+```
+Copy your public key across from the desktop client to the new server by running the `ssh-copy-id` command, substituting the IP address of your new server.
+```
+ssh-copy-id testuser@10.0.2.7
+```
+
+Now SSH to the server, you won't be prompted for your password. If you are still asked for this you need to check that the correct public key has been copied over. Use the `less` command to view your public key on the desktop linux computer.
+
+Now log onto the server and use the `less` pager command to view the `~/.ssh/authorized_keys` file. This contains all of the public keys that have been copied to the server. Check that the key matches the one on your desktop. If not, you will need to delete it and paste in the correct version.
+
+## Deployment
+
+Now we have explored three different ways to connect to a remote host and have two servers configured it is time to practice deploying some code and getting it running. For this, there are a couple of options.
+
+### RSync
+
+You should be able to use the `rsync` command to syncronise the directories on your file server and ssh server. Practice using this command and learn about the key flags you can use.
+
+When you have mastered this, add the correct command to `cron` to automate the transfer of the `todo` files at regular intervals (start with each minute so you can see it working). Once running you should be able to modify one of the files (if you are not comfortable with _NodeJS_ you should stick to modifying the `README.md` file!)
+
+### SFTP
+
+Practice transferring the `todo` project files to the **FTP Server** using the `sftp` program. Can this process be automated in a shell script?
