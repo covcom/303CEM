@@ -62,7 +62,7 @@ nano /etc/exports
 ```
 We need to edit this file to tell the `nfs` tool which directories to share.
 ```
-/home/backup
+/home/backup *(rw,sync)
 ```
 Then restart the `nfs` server.
 ```
