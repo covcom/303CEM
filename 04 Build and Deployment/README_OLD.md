@@ -1,17 +1,4 @@
 
-Assumed knowledge by this stage:
-
-1. the YAML file format
-2. connecting using SSH
-3. pipes and redirection
-4. install packages
-5. using sudo
-6. file permissions
-7. starting and stopping services
-8. environment variables
-9. shell scripting
-10. Jinja2 templating
-
 # Automating Server Builds
 
 By now you will have learned the concepts, tools and techniques needed to build servers. This was achieved by completing a sequence of steps which needed to be done in a particular order. You may also have discovered that we as humans are slow at completing the tasks and often make mistakes.
