@@ -372,6 +372,7 @@ To test these settings:
 
 1. try to curl the gateway server IP from the External server
 2. make sure you can reach the Internet from your Client server.
+3. to see a visual representation of your IP Tables run the command `iptables -L -vx` and enter the results into  http://jekor.com/gressgraph/.
 
 ### Starting the IP Tables on Boot
 
