@@ -25,6 +25,13 @@ First we check the network and identify the hosts attached to the network:
 
 We ping the network address range using nmap (-sP indicates use an ICMP ping and -R targets an address range). This assumes the network is 10.5.5.0.
 
+If nmap is unable to locate nse_main.lua install the following packages:
+
+    apk add nmap-nselibs
+    apk add nmap-ncat
+    apk add nmap-scripts
+    apk add nmap-nping
+
 ```
 nmap -sP -R 10.5.5.1-254
   Starting Nmap 6.47 ( http://nmap.org ) at 2016-11-14 19:32 GMT
