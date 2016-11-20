@@ -1,131 +1,224 @@
-# Crypto Lab – Public-Key Cryptography and PKI
 
-_Copyright 2006 - 2014 Wenliang Du, Syracuse University.
-The development of this document is/was funded by three grants from the US National Science Foundation: Awards No. 0231122 and 0618680 from TUES/CCLI and Award No. 1017771 from Trustworthy Computing. Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation. A copy of the license can be found at http://www.gnu.org/licenses/fdl.html._
+# Simple Secure API
 
-## 1 Overview
+In this lab you will install and run a simple working API that is used to teach the principles of application deployment. The code is on a repository at `https://github.com/covcom/todo.git`.
 
-The learning objective of this lab is for students to get familiar with the concepts in the Public-Key encryption and Public-Key Infrastructure (PKI). After finishing the lab, students should be able to gain a first-hand experience on public-key encryption, digital signature, public-key certificate, certificate authority, authentication based on PKI. Moreover, students will be able to use tools and write programs to create secure channels using PKI.
+You will need two virtual machines on the same _internal network_. Start by launching your **gateway** server and make sure both the gateway and DHCP services are running. Link clone a Debian Server and call it **API Server**, this is where you will be running your API and will be referred to as the **server**. The second machine should be your Debian Desktop developer image which will be referred to as the **client**. Make sure both the _server_ and _client_ can connect to the Internet.
 
-## 2 Lab Environment
+### Configure the client
 
-**Installing OpenSSL**. In this lab, we will use `openssl` commands and libraries. We have already installed _openssl binaries_ in our VM. It should be noted that if you want to use openssl libraries in your programs, you need to install several other things for the programming environment, including the header files, libraries, manuals, etc. We have already downloaded the necessary files under the directory `/seed/openssl-1.0.1`. To configure and install openssl libraries, run the following commands.
+You will need to install `wireshark` the **Chrome Web Browser** on the client if this is not already installed. Wireshark can be installed from the repositories however you will need to download and install Chrome manually.
 ```
-You should read the INSTALL file first:
-% ./config
-% make
-% make test
-% sudo make install
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb; sudo apt-get -f -y install
+rm google-chrome-stable_current_amd64.deb
 ```
-
-## 3 Lab Tasks
-
-### 3.1 Task 1: Become a Certificate Authority (CA)
-
-A Certificate Authority (CA) is a trusted entity that issues digital certificates. The digital certificate certifies the ownership of a public key by the named subject of the certificate. A number of commercial CAs are treated as root CAs; VeriSign is the largest CA at the time of writing. Users who want to get digital certificates issued by the commercial CAs need to pay those CAs.
-
-In this lab, we need to create digital certificates, but we are not going to pay any commercial CA. We will become a root CA ourselves, and then use this CA to issue certificate for others (e.g. servers). In this task, we will make ourselves a root CA, and generate a certificate for this CA. Unlike other certificates, which are usually signed by another CA, the root CA’s certificates are self-signed. Root CA’s certificates are usually pre-loaded into most operating systems, web browsers, and other software that rely on PKI. Root CA’s certificates are unconditionally trusted.
-
-**The Configuration File** `openssl.cnf`. In order to use OpenSSL to create certificates, you have to have a configuration file. The configuration file usually has an extension `.cnf`. It is used by three `OpenSSL` commands: `ca`, `req` and `x509`. The manual page of `openssl.cnf` can be found using Google search. You can also get a copy of the configuration file from `/usr/lib/ssl/openssl.cnf`. After copying this file into your current directory (you can create a suitable directory for certificates etc. with a name of your own choosing in your home directory), you need to create several sub-directories as specified in the configuration file (look at the `[CA default]` section):
+You will need to modify the permissions before running _Wireshark_.
 ```
-dir             = ./demoCA        # Where everything is kept
-certs           = $dir/certs      # Where the issued certs are kept
-crl_dir         = $dir/crl        # Where the issued crl are kept
-new_certs_dir   = $dir/newcerts   # default place for new certs.
-database        = $dir/index.txt  # database index file.
-serial          = $dir/serial     # The current serial number
+sudo chown root:wireshark /usr/bin/dumpcap
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+sudo usermod -a -G wireshark newuser
 ```
 
-For the `index.txt` file, simply create an empty file. For the `serial` file, put a single number in string format (e.g. 1000) in the file. Once you have set up the configuration file `openssl.cnf`, you can create and issue certificates.
+### Configure SSH on the Server
 
-**Certificate Authority (CA)**. As we described before, we need to generate a self-signed certificate for our CA. This means that this CA is totally trusted, and its certificate will serve as the root certificate. You can run the following command to generate the self-signed certificate for the CA:
+Log into the _server_ and install `git`, `sudo`, `curl` and `openssh-server`. Make a note of the _server_ IP address.
 
-`$ openssl req -new -x509 -keyout ca.key -out ca.crt -config openssl.cnf`
-
-You will be prompted for information and a password. Do not lose this password, because you will have to type the passphrase each time you want to use this CA to sign certificates for others. You will also be asked to fill in some information, such as the Country Name, Common Name, etc. The output of the command are stored in two files: `ca.key` and `ca.crt`. The file `ca.key` contains the CA’s private key, while `ca.crt` contains the public-key certificate.
-
-### 3.2 Task 2: Create a Certificate for PKILabServer.com
-
-Now, we become a root CA, we are ready to sign digital certificates for our customers. Our first customer is a company called `PKILabServer.com`. For this company to get a digital certificate from a CA, it needs to go through three steps.
-
-**Step 1: Generate public/private key pair.** The company needs to first create its own public/private key pair. We can run the following command to generate an RSA key pair (both private and public keys). You will also be required to provide a password to protect the keys. The keys will be stored in the file `server.key`:
-
-`$ openssl genrsa -des3 -out server.key 1024`
-
-**Step 2: Generate a Certificate Signing Request (CSR).** Once the company has the key file, it should generates a Certificate Signing Request (CSR). The CSR will be sent to the CA, who will generate a certifi- cate for the key (usually after ensuring that identity information in the CSR matches with the server’s true identity). Please use `PKILabServer.com` as the common name of the certificate request.
-
-`$ openssl req -new -key server.key -out server.csr -config openssl.cnf`
-
-**Step 3: Generating Certificates.** The CSR file needs to have the CA’s signature to form a certificate. In the real world, the CSR files are usually sent to a trusted CA for their signature. In this lab, we will use our own trusted CA to generate certificates:
-
-`$ openssl ca -in server.csr -out server.crt -cert ca.crt -keyfile ca.key -config openssl.cnf`
-
-If `OpenSSL` refuses to generate certificates, it is very likely that the names in your requests do not match with those of CA. The matching rules are specified in the configuration file (look at the `[policy match]` section). You can change the names of your requests to comply with the policy, or you can change the policy. The configuration file also includes another policy (called `policy_anything`), which is less restrictive. You can choose that policy by changing the following line:
-
-`"policy = policy_match"` change to `"policy = policy_anything"`.
-
-### 3.3 Task 3: Use PKI for Web Sites
-
-In this lab, we will explore how public-key certificates are used by web sites to secure web browsing. First, we need to get our domain name. Let us use `PKILabServer.com` as our domain name. To get our computers recognize this domain name, let us add the following entry to `/etc/hosts`; this entry basically maps the domain name `PKILabServer.com` to our localhost (i.e., 127.0.0.1):
-
-`127.0.0.1 PKILabServer.com`
-
-Next, let us launch a simple web server with the certificate generated in the previous task. OpenSSL allows us to start a simple web server using the `s_server` command:
+There is already a user called `newuser` (with a password of `raspberry`) but they need to be added to the _sudoers_ group.
 ```
-# Combine the secret key and certificate into one file
-% cp server.key server.pem
-% cat server.crt >> server.pem
-# Launch the web server using server.pem
-% openssl s_server -cert server.pem -www
-```
-By default, the server will listen on port `4433`. You can alter that using the `-accept` option. Now, you can access the server using the following URL: `https://PKILabServer.com:4433/`. Most likely, you will get an error message from the browser. In Firefox, you will see a message like the following: _“pkilabserver.com:4433 uses an invalid security certificate. The certificate is not trusted because the issuer certificate is unknown”_.
-
-Had this certificate been assigned by VeriSign, we will not have such an error message, because VeriSign’s certificate is very likely preloaded into Firefox’s certificate repository already. Unfortunately, the certificate of `PKILabServer.com` is signed by our own CA (i.e., using `ca.crt`), and this CA is not recognized by Firefox. There are two ways to get Firefox to accept our CA’s self-signed certificate.
-
-- We can request Mozilla to include our CA’s certificate in its Firefox software, so everybody using Firefox can recognize our CA. This is how the real CAs, such as VeriSign, get their certificates into Firefox. Unfortunately, our own CA does not have a large enough market for Mozilla to include our certificate, so we will not pursue this direction.
-- Load `ca.crt` into Firefox: We can manually add our CA’s certificate to the Firefox browser by clicking the following menu sequence:
-
-`Edit -> Preference -> Advanced -> View Certificates`
-
-You will see a list of certificates that are already accepted by Firefox. From here, we can “import” our own certifcate. Please import `ca.crt`, and select the following option: _“Trust this CA to identify web sites”_. You will see that our CA’s certificate is now in Firefox’s list of the accepted certificates.
-
-Now, point the browser to `https://PKILabServer.com:4433`. Please describe and explain your observations. Please also do the following tasks:
-
-1. Modify a single byte of server.pem, and restart the server, and reload the URL. What do you observe? Make sure you restore the original server.pem afterward. Note: the server may not be able to restart if certain places of server.pem is corrupted; in that case, choose another place to modify.
-2. Since `PKILabServer.com` points to the localhost, if we use `https://localhost:4433` instead, we will be connecting to the same web server. Please do so, describe and explain your observations.
-
-### 3.4 Task 4: Using PKI to establish secure TCP connections with PKILabServer.com
-
-In this task, we will implement a TCP client and TCP server, which are connected via a secure TCP con- nection. Namely, the traffic between the client and the server are encrypted using a session key that are known only to the client and the server. Moreover, the client needs to ensure that it is talking to the intended server (we use PKILabServer.com as the intended server), not a spoofed one; namely, the client needs to authenticate the server. This server authentication should be done using public-key certificates (In practice, the server also needs to authenticate the client. However, for the sake of simplicity, we do not implement the client authentication in this task).
-
-`OpenSSL` has implemented the SSL protocol that can be used to achieve the above goals. You can use `OpenSSL`’s SSL functions directly to make an SSL connection between the client and the server, in which case, the verification of certificates will be automatically carried out by the SSL functions. There are many online tutorials on these SSL functions, so we will not give another one here. The followings are a few tutorials that are useful for this lab. These tutorials are also linked in the web page of this lab.
-
-- OpenSSL examples: https://www.ibm.com/developerworks/library/l-openssl/
-- http://www.ibm.com/developerworks/linux/library/l-openssl.html
-
-We provide two example programs, `cli.cpp` and `serv.cpp`, in a file demo `openssl api.tar.gz`, to help you to understand how to use `OpenSSL` API to build secure TCP connections. The file can be down- loaded from the lab’s web page. The programs demonstrate how to make SSL connections, how to get peer’s certificate, how to verify certificates, how to get information out of certificates, etc. To make the program work, you have to untar it first and run make command. We have included the password for the server and client in the README file. You can use these programs as the basis to finish this task.
-
-### 3.5 Task 5: Performance Comparison: RSA versus AES
-
-In this task, we will study the performance of public-key algorithms. Please prepare a file (message.txt) that contains a 16-byte message. Please also generate an 1024-bit RSA public/private key pair. Then, do the following:
-
-1. Encrypt `message.txt` using the public key; save the the output in message `enc.txt`.
-2. Decrypt message `enc.txt` using the private key.
-3. Encrypt `message.txt` using a 128-bit AES key.
-4. Compare the time spent on each of the above operations, and describe your observations. If an operation is too fast, you may want to repeat it for many times, and then take an average.
-
-After you finish the above exercise, you can now use `OpenSSL`’s `speed` command to do such a benchmarking. Please describe whether your observations are similar to those from the outputs of the speed command. The following command shows examples of using speed to benchmark `rsa` and `aes`:
-```
-% openssl speed rsa
-% openssl speed aes
+usermod -a -G sudo newuser
 ```
 
-### 3.6 Task 6: Create Digital Signature
-In this task, we will use OpenSSL to generate digital signatures. Please prepare a file (example.txt) of any size. Please also prepare an RSA public/private key pair. Do the following:
+## Cloning the Repository
 
-1. Sign the SHA256 hash of `example.txt`; save the output in `example.sha256`.
-2. Verify the digital signature in `example.sha256`.
-3. Slightly modify `example.txt`, and verify the digital signature again.
+Use the _client_ to SSH to the _server_ using the `newuser` account and clone the repository.
+```
+git clone https://github.com/covcom/todo.git
+```
+This will create a new directory called `todo/`, Navigate into this.
 
-Please describe how you did the above operations (e.g., what commands do you use, etc.). Explain your observations. Please also explain why digital signatures are useful.
-  
+## Installing NodeJS
+
+You will need to install the Node Version Manager tool which you can then use to install the latest stable version of NodeJS `node` and the Node Package Manager `npm`. Once this is installed you need to install the packages specified by `package.json`. Finally we can run the NodeJS API.
+```
+curl -s https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.bashrc
+nvm list-remote
+nvm install 7.1.0
+npm install --only=production
+node index
+```
+The script specifies that the default port used by the API is `8080`. Open the Chrome web browser and access the root of the API (remember to substitute the IP address of your server):
+```
+http://10.5.5.9:8080
+```
+You will get a response to state:
+```
+{"message": "no lists found"}
+```
+
+### Specifying a Port
+
+By default the server runs on port 8080 as defined in the defaultPort constant in the script. If we want to run the server on a different port we have two options:
+
+1. change the value of `defaultPort`
+2. define an environment variable on the server
+
+The risk of allowing a developer to specifiy the port for a service is that this port would need to be configured on the network which creates additional work for the system admin team. The second option is therefore preferred. This allows the systems admin team to configure their preferred port by defining an environment variable. The developer then needs to incorporate this variable into their script.
+
+Lets define a new environment variable called `PORT` and assign it a value of `8000`. This is added to the `.profile` file in the home directory, then this data is loaded. Finally we print the contents of the variable.
+```
+"export PORT=8000" >> ~/.profile
+source ~/.profile
+echo $PORT
+```
+Stop the server using `ctrl+c` and restart using `node index`. Now the API can be accessed on port `8000` rather than `8080`.
+
+## Packet Sniffing
+
+The _server_ is listening for incoming http requests and sending responses over an unencrypted connection. This means the data packets can be intercepted and read. We are going to learn how this can be done using a tool called `wireshark`.
+
+Open the **Wireshark** app and choose the active interface your _client_ is using to connect to the rest of the network. In our case this is `eth0`. Now click on the **Capture Options** button.
+
+![starting a wireshark capture](.images/step03.png)
+
+In the **Capture Filter** box enter the string `host 10.5.5.9`, substituting the IP address of your _server_. Now click on the **Start** button.
+
+![wireshark capture filter](.images/step04.png)
+
+Now use the _Chrome Browser_ to access `http://10.5.5.9:8080`.
+
+If you return to the Wireshark interface you will see that it has captured some packets.
+
+![data captured in wireshark](.images/step05.png)
+
+1. Under the toolbar you will see a **filter toolbar** which will be used to filter the contents of the _packet list pane_.
+2. The **Packet List Pane** displays a summary of each captured packet. Clicking a packet displays details in the other two panes.
+3. The **Packet Details Pane** displays details of the selected packet.
+4. The **Packet Bytes Pane** displays the data within the packet.
+
+We are only interested in the **HTTP** packets so we can apply a filter. Enter `http.request.method == "GET"` then click on the **Apply** button. Notice how we are now left with only the packets that satisfy the filter.
+
+![filter in wireshark](.images/step06.png)
+
+Select the first row and you will see data for the different layers in the OSI model. If you expand the **Hypertext Transfer Protocol** section you will see the entire HTTP request in plain text. As you select each part of this the bottom pane shows where the data can be found in the packet.
+
+### Test Your Knowledge
+
+1. How much information can you glean about the communication between client and server?
+2. Change the filter to `http.response` and investigate further
+3. Right-click on the first row in the _Packet List Pane_ and choose `Follow TCP Stream`.
+
+## Running over HTTPS
+
+As you can see, by running over an insecure connection, a packet sniffer such as _Wireshark_ can read the data passing over the network. To secure our connection we need to run our server over an encrypted connection.
+
+### Generating an SSL Certificate
+
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
+ The `openssl` command takes a **command**. In this case we are using the `req` command specifies we want to generate a _PKCS#10 X .509 Certificate Signing Request (CSR)_.
+ 
+ Open the _man page_ for the `req` command and find out the purpose of the different flags we have used.
+
+ 1. the `-x509` flag indicates we are generating a _self-signed certificate_
+ 2. the `-newkey` flag creates a new 4096 bit certificate using the **rsa** algorithm
+ 3. the `-keyout` flag specifies the filename to use for the _private_ key
+ 4. the `-out` flag specifies the _certificate_ filename
+ 5. the `-days` flag defines the valid duration of the certificate (if omitted, the default is 30 days)
+ 6. the `-nodes` flag specified that the private key should not be encrypted
+
+Running this command will generate both files in the current directory. These need to be imported into the NodeJS script so that it can handle the secure connection. There is a second script called `secure.js` that loads this data. Open it and find the `httpsOptions` constant near the top of the script.
+
+We can run this using `node secure`. Try connecting using:
+```
+https://10.5.5.9
+```
+Make sure you substitute your server's IP address. This uses the default port defined in the script however it looks for an environment variable called `HTTPS` and as a systems administrator you should never rely on default values.
+```
+"export HTTPS=443" >> ~/.profile
+source ~/.profile
+echo $HTTPS
+```
+
+### Test Your Knowledge
+
+You have already seen how much data can be intercepted when the API communicates over an unencrypted connection. 
+
+1. Use _Wireshark_ to listen in to the communication over HTTPS.
+2. How much useful information can you find?
+
+## Using the API
+
+Now the API is installed and running over HTTPS you can interact with it. Open up the **Chrome Postman** tool. This can be installed as either a Mac or Chrome app from https://www.getpostman.com/.
+
+Once open, make sure your API is running then choose the **GET** methos, enter your secure URL and click on the **Send** button. This will send your request to the API.
+
+![an empty set of lists](.images/step01.png)
+
+The response is in JSON format and is displayed under the body tab. Notice that the response code is `404 not found` because there are currently no lists.
+
+### Adding a List
+
+To add a new list we need to POST it. Change the HTTP method from GET to POST then, in the request body add the list name and items in JSON format as shown.
+```
+{
+  "name": "colours",
+  "list": [
+  	"red",
+  	"orange"
+  ]
+}
+```
+Now click on the **Send** button. This time you should get the list details back in the response including the last modified date and time plus a unique ID.
+
+![adding a new list](.images/step02.png)
+
+If we now make a **GET** request we should see an array is returned with a single index.
+
+Addd a second list, this time for our shopping.
+```
+{
+  "name": "shopping",
+  "list": [
+  	"bread",
+  	"butter"
+  ]
+}
+```
+If we make a GET request we should see an array with two indexes.
+```
+GET https://10.5.5.9/lists
+
+  {
+    "lists": [
+      {
+        "name": "colours",
+        "id": "jo2fpfk9poefw66x09xuvru4f0"
+      },
+      {
+        "name": "shopping",
+        "id": "uerxmusyle808xaxvs11572os8"
+      }
+    ]
+  }
+```
+
+### Getting List Details
+
+We can see the details of the list by making a GET request, specifying the list ID.
+```
+GET https://10.5.5.9/lists/uerxmusyle808xaxvs11572os8
+
+  {
+    "id": "uerxmusyle808xaxvs11572os8",
+    "name": "shopping",
+    "modified": "2016-11-20T11:52:14.039Z",
+    "list": [
+      "bread",
+      "butter"
+    ]
+  }
+```
