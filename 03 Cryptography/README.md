@@ -7,7 +7,7 @@ You will need two virtual machines on the same _internal network_. Start by laun
 
 ### Configure the client
 
-You will need to install `wireshark` the **Chrome Web Browser** on the client if this is not already installed. Wireshark can be installed from the repositories however you will need to download and install Chrome manually.
+You will need to install **Wireshark** and the **Chrome Web Browser** on the client if this is not already installed. Wireshark can be installed from the repositories however you will need to download and install Chrome manually.
 ```
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i google-chrome-stable_current_amd64.deb; sudo apt-get -f -y install
@@ -132,16 +132,27 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -node
 
 Running this command will generate both files in the current directory. These need to be imported into the NodeJS script so that it can handle the secure connection. There is a second script called `secure.js` that loads this data. Open it and find the `httpsOptions` constant near the top of the script.
 
-We can run this using `node secure`. Try connecting using:
+We can run this using `node secure`.
+
+Once the server is up and running open Chrome and enter the following URL:
 ```
-https://10.5.5.9
+https://10.5.5.9:4433/lists
 ```
-Make sure you substitute your server's IP address. This uses the default port defined in the script however it looks for an environment variable called `HTTPS` and as a systems administrator you should never rely on default values.
+Make sure you substitute your server's IP address. You will get a security warning because your certificate is not registered.
+
+![security warning](.images/step07.png)
+
+Click on the red triangle and choose **Details**. Choose **Proceed** to view the page.
+
+### Setting a Port Variable
+
+This uses the default port defined in the script however it looks for an environment variable called `HTTPS` and as a systems administrator you should never rely on default values.
 ```
-"export HTTPS=443" >> ~/.profile
+"export HTTPS=4000" >> ~/.profile
 source ~/.profile
 echo $HTTPS
 ```
+Now restart the secure server. It should pick up the new port number.
 
 ### Test Your Knowledge
 
