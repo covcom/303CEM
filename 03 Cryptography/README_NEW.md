@@ -3,9 +3,35 @@
 
 In this lab you will install and run a simple working API that is used to teach the principles of application deployment. The code is on a repository at `https://github.com/covcom/todo.git`.
 
+You will need two virtual machines on the same _internal network_. Start by launching your **gateway** server and make sure both the gateway and DHCP services are running. Link clone a Debian Server and call it **API Server**, this is where you will be running your API and will be referred to as the **server**. The second machine should be your Debian Desktop developer image which will be referred to as the **client**. Make sure both the _server_ and _client_ can connect to the Internet.
+
+### Configure the client
+
+You will need to install `wireshark` the **Chrome Web Browser** on the client if this is not already installed. Wireshark can be installed from the repositories however you will need to download and install Chrome manually.
+```
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb; sudo apt-get -f -y install
+rm google-chrome-stable_current_amd64.deb
+```
+You will need to modify the permissions before running _Wireshark_.
+```
+sudo chown root:wireshark /usr/bin/dumpcap
+sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
+sudo usermod -a -G wireshark newuser
+```
+
+### Configure SSH on the Server
+
+Log into the _server_ and install `git`, `sudo`, `curl` and `openssh-server`. Make a note of the _server_ IP address.
+
+There is already a user called `newuser` (with a password of `raspberry`) but they need to be added to the _sudoers_ group.
+```
+usermod -a -G sudo newuser
+```
+
 ## Cloning the Repository
 
-Clone a **Debian Server** instance and log in. Now clone the repository.
+Use the _client_ to SSH to the _server_ using the `newuser` account and clone the repository.
 ```
 git clone https://github.com/covcom/todo.git
 ```
@@ -22,9 +48,13 @@ nvm install 7.1.0
 npm install --only=production
 node index
 ```
-The script specifies that the default port used by the API is `8080`. Open a web browser and access the root of the API (remember to substitute the IP address of your server):
+The script specifies that the default port used by the API is `8080`. Open the Chrome web browser and access the root of the API (remember to substitute the IP address of your server):
 ```
 http://10.5.5.10:8080
+```
+You will get a response to state:
+```
+{"message": "no lists found"}
 ```
 
 ### Specifying a Port
@@ -42,11 +72,46 @@ Lets define a new environment variable called `PORT` and assign it a value of `8
 source ~/.profile
 echo $PORT
 ```
-Stop the server using `ctrl+c` and restart using `node index`. Now the API can be accessed on port `8000` rather than `8080`
+Stop the server using `ctrl+c` and restart using `node index`. Now the API can be accessed on port `8000` rather than `8080`.
+
+## Packet Sniffing
+
+The _server_ is listening for incoming http requests and sending responses over an unencrypted connection. This means the data packets can be intercepted and read. We are going to learn how this can be done using a tool called `wireshark`.
+
+Open the **Wireshark** app and choose the active interface your _client_ is using to connect to the rest of the network. In our case this is `eth0`. Now click on the **Capture Options** button.
+
+![starting a wireshark capture](.images/step03.png)
+
+In the **Capture Filter** box enter the string `host 10.5.5.9`, substituting the IP address of your _server_. Now click on the **Start** button.
+
+![wireshark capture filter](.images/step04.png)
+
+Now use the _Chrome Browser_ to access `http://10.5.5.10:8080`.
+
+If you return to the Wireshark interface you will see that it has captured some packets.
+
+![data captured in wireshark](.images/step05.png)
+
+1. Under the toolbar you will see a **filter toolbar** which will be used to filter the contents of the _packet list pane_.
+2. The **Packet List Pane** displays a summary of each captured packet. Clicking a packet displays details in the other two panes.
+3. The **Packet Details Pane** displays details of the selected packet.
+4. The **Packet Bytes Pane** displays the data within the packet.
+
+We are only interested in the **HTTP** packets so we can apply a filter. Enter `http.request.method == "GET"` then click on the **Apply** button. Notice how we are now left with only the packets that satisfy the filter.
+
+![filter in wireshark](.images/step06.png)
+
+Select the first row and you will see data for the different layers in the OSI model. If you expand the **Hypertext Transfer Protocol** section you will see the entire HTTP request in plain text. As you select each part of this the bottom pane shows where the data can be found in the packet.
+
+### Test Your Knowledge
+
+1. How much information can you glean about the communication between client and server?
+2. Change the filter to `http.response` and investigate further
+3. Right-click on the first row in the _Packet List Pane_ and choose `Follow TCP Stream`.
 
 ## Running over HTTPS
 
-At the moment the server is running over an insecure connection which would allow hackers to intercept data using a packet sniffer. To secure our connection we need to run our server over an encrypted connection.
+As you can see, by running over an insecure connection, a packet sniffer such as _Wireshark_ can read the data passing over the network. To secure our connection we need to run our server over an encrypted connection.
 
 ### Generating an SSL Certificate
 
@@ -77,6 +142,13 @@ Make sure you substitute your server's IP address. This uses the default port de
 source ~/.profile
 echo $HTTPS
 ```
+
+### Test Your Knowledge
+
+You have already seen how much data can be intercepted when the API communicates over an unencrypted connection. 
+
+1. Use _Wireshark_ to listen in to the communication over HTTPS.
+2. How much useful information can you find?
 
 ## Using the API
 
