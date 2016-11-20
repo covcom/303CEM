@@ -50,7 +50,7 @@ node index
 ```
 The script specifies that the default port used by the API is `8080`. Open the Chrome web browser and access the root of the API (remember to substitute the IP address of your server):
 ```
-http://10.5.5.10:8080
+http://10.5.5.9:8080
 ```
 You will get a response to state:
 ```
@@ -86,7 +86,7 @@ In the **Capture Filter** box enter the string `host 10.5.5.9`, substituting the
 
 ![wireshark capture filter](.images/step04.png)
 
-Now use the _Chrome Browser_ to access `http://10.5.5.10:8080`.
+Now use the _Chrome Browser_ to access `http://10.5.5.9:8080`.
 
 If you return to the Wireshark interface you will see that it has captured some packets.
 
@@ -134,7 +134,7 @@ Running this command will generate both files in the current directory. These ne
 
 We can run this using `node secure`. Try connecting using:
 ```
-https://10.5.5.10
+https://10.5.5.9
 ```
 Make sure you substitute your server's IP address. This uses the default port defined in the script however it looks for an environment variable called `HTTPS` and as a systems administrator you should never rely on default values.
 ```
@@ -190,7 +190,7 @@ Addd a second list, this time for our shopping.
 ```
 If we make a GET request we should see an array with two indexes.
 ```
-GET https://10.5.5.10/lists
+GET https://10.5.5.9/lists
 
   {
     "lists": [
@@ -210,7 +210,7 @@ GET https://10.5.5.10/lists
 
 We can see the details of the list by making a GET request, specifying the list ID.
 ```
-GET https://10.5.5.10/lists/uerxmusyle808xaxvs11572os8
+GET https://10.5.5.9/lists/uerxmusyle808xaxvs11572os8
 
   {
     "id": "uerxmusyle808xaxvs11572os8",
