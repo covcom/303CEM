@@ -15,6 +15,7 @@ rm google-chrome-stable_current_amd64.deb
 ```
 You will need to modify the permissions before running _Wireshark_.
 ```
+sudo addgroup -system wireshark
 sudo chown root:wireshark /usr/bin/dumpcap
 sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 sudo usermod -a -G wireshark newuser
