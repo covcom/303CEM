@@ -89,11 +89,11 @@ Open the **Wireshark** app and choose the active interface your _client_ is usin
 
 ![starting a wireshark capture](.images/step03.png)
 
-In the **Capture Filter** box enter the string `host 10.5.5.9`, substituting the IP address of your _server_. Now click on the **Start** button.
+In the **Capture Filter** box enter the string `host 10.5.5.9`, substituting the IP address of your _server_. Now click on the **Start** button or press the ENTER key.
 
 ![wireshark capture filter](.images/step04.png)
 
-Now use the _Chrome Browser_ to access `http://10.5.5.9:8080`.
+Now use the _Chrome Browser_ to access `http://10.5.5.9:8000`.
 
 If you return to the Wireshark interface you will see that it has captured some packets.
 
