@@ -42,7 +42,7 @@ Once you are connected to the _server_, you will need to clone the repository
 ```
 git clone https://github.com/covcom/todo.git
 ```
-This will create a new directory called `todo/` on the _server_, Navigate into this.
+This will create a new directory called `todo/` on the _server_, **Navigate into this directory**.
 
 ## Installing NodeJS
 
