@@ -34,11 +34,15 @@ usermod -a -G sudo newuser
 
 ## Cloning the Repository
 
-Use the _client_ to SSH to the _server_ using the `newuser` account and clone the repository.
+Use the `terminal` application on the _client_ to SSH to the _server_ using the `newuser` account.
+```
+ssh newuser@10.5.5.9
+```
+Once you are connected to the _server_, you will need to clone the repository
 ```
 git clone https://github.com/covcom/todo.git
 ```
-This will create a new directory called `todo/`, Navigate into this.
+This will create a new directory called `todo/` on the _server_, Navigate into this.
 
 ## Installing NodeJS
 
