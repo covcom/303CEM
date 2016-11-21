@@ -9,6 +9,8 @@ You will need two virtual machines on the same _internal network_. Start by laun
 
 You will need to install **Wireshark** and the **Chrome Web Browser** on the client if this is not already installed. Wireshark can be installed from the repositories however you will need to download and install Chrome manually.
 ```
+sudo apt-get install wireshark
+
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo dpkg -i google-chrome-stable_current_amd64.deb; sudo apt-get -f -y install
 rm google-chrome-stable_current_amd64.deb
