@@ -73,13 +73,13 @@ By default the server runs on port 8080 as defined in the defaultPort constant i
 
 The risk of allowing a developer to specifiy the port for a service is that this port would need to be configured on the network which creates additional work for the system admin team. The second option is therefore preferred. This allows the systems admin team to configure their preferred port by defining an environment variable. The developer then needs to incorporate this variable into their script.
 
-Lets define a new environment variable called `PORT` and assign it a value of `8000`. This is added to the `.profile` file in the home directory, then this data is loaded. Finally we print the contents of the variable.
+Stop the API using `ctrl+c`, define a new environment variable called `PORT` and assign it a value of `8000`. This is added to the `.profile` file in the home directory, then this data is loaded. Finally we print the contents of the variable.
 ```
 "export PORT=8000" >> ~/.profile
 source ~/.profile
 echo $PORT
 ```
-Stop the server using `ctrl+c` and restart using `node index`. Now the API can be accessed on port `8000` rather than `8080`.
+Restart the API using `node index`. Now the API can be accessed on port `8000` rather than `8080`.
 
 ## Packet Sniffing
 
