@@ -75,7 +75,7 @@ The risk of allowing a developer to specifiy the port for a service is that this
 
 Stop the API using `ctrl+c`, define a new environment variable called `PORT` and assign it a value of `8000`. This is added to the `.profile` file in the home directory, then this data is loaded. Finally we print the contents of the variable.
 ```
-"export PORT=8000" >> ~/.profile
+export "PORT=8000" >> ~/.profile
 source ~/.profile
 echo $PORT
 ```
