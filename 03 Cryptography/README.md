@@ -174,7 +174,7 @@ Now the API is installed and running over HTTPS you can interact with it. Open u
 
 Once open, make sure your API is running then choose the **GET** methos, enter your secure URL and click on the **Send** button. This will send your request to the API.
 
-**Note:** Make sure you have entered the correct secure URL. The URL shown is the figure below is just an example. 
+**Note:** Make sure you have entered the correct secure URL. The URL shown in the figure below is just an example. 
 
 ![an empty set of lists](.images/step01.png)
 
