@@ -143,9 +143,9 @@ We can run this using `node secure`.
 
 Once the server is up and running open Chrome and enter the following URL:
 ```
-https://10.5.5.9:4433/lists
+https://10.5.5.9:8080/lists
 ```
-Make sure you substitute your server's IP address. You will get a security warning because your certificate is not registered.
+Make sure you substitute your server's IP address and that you use the default port. You will get a security warning because your certificate is not registered.
 
 ![security warning](.images/step07.png)
 
@@ -155,7 +155,7 @@ Click on the red triangle and choose **Details**. Choose **Proceed** to view the
 
 This uses the default port defined in the script however it looks for an environment variable called `HTTPS` and as a systems administrator you should never rely on default values.
 ```
-"export HTTPS=4000" >> ~/.profile
+export "HTTPS=4000" >> ~/.profile
 source ~/.profile
 echo $HTTPS
 ```
@@ -174,13 +174,15 @@ Now the API is installed and running over HTTPS you can interact with it. Open u
 
 Once open, make sure your API is running then choose the **GET** methos, enter your secure URL and click on the **Send** button. This will send your request to the API.
 
+**Note:** Make sure you have entered the correct secure URL. The URL shown is the figure below is just an example. 
+
 ![an empty set of lists](.images/step01.png)
 
 The response is in JSON format and is displayed under the body tab. Notice that the response code is `404 not found` because there are currently no lists.
 
 ### Adding a List
 
-To add a new list we need to POST it. Change the HTTP method from GET to POST then, in the request body add the list name and items in JSON format as shown.
+To add a new list we need to POST it. Change the HTTP method from GET to POST then, click on the **Params** button and in the request body add the list name and items in JSON format as shown.
 ```
 {
   "name": "colours",
@@ -208,7 +210,7 @@ Addd a second list, this time for our shopping.
 ```
 If we make a GET request we should see an array with two indexes.
 ```
-GET https://10.5.5.9/lists
+GET https://10.5.5.9:4000/lists
 
   {
     "lists": [
@@ -228,7 +230,7 @@ GET https://10.5.5.9/lists
 
 We can see the details of the list by making a GET request, specifying the list ID.
 ```
-GET https://10.5.5.9/lists/uerxmusyle808xaxvs11572os8
+GET https://10.5.5.9:4000/lists/uerxmusyle808xaxvs11572os8
 
   {
     "id": "uerxmusyle808xaxvs11572os8",
