@@ -22,6 +22,7 @@ sudo chown root:wireshark /usr/bin/dumpcap
 sudo setcap cap_net_raw,cap_net_admin=eip /usr/bin/dumpcap
 sudo usermod -a -G wireshark newuser
 ```
+Make sure you **restart** the _client_ before continuing
 
 ### Configure SSH on the Server
 
