@@ -34,6 +34,23 @@ ifconfig
             inet6 addr: 2a02:c7d:761e:8b00:a00:27ff:fe78:2b86/64 Scope:Global
 ```
 
+#### 1.1.2 Screen Blanking
+
+You have probably noticed that if you leave the screen for a while it blanks out. This is a type of screensaver. To see the default timeout in seconds:
+```
+$ cat /sys/module/kernel/parameters/consoleblank
+  600
+```
+As you can see, the default setting is 10 minutes but this can be changed. Assigning a value of 0 will disable the screen blanking.
+```
+$ setterm -blank 0
+$ cat /sys/module/kernel/parameters/consoleblank
+  0
+```
+NOTE: if you are running **Alpine Linux**, the `setterm` command is not installed so we will need to install it. Start by searching https://pkgs.alpinelinux.org/contents for `setterm`. Notice it is in the `util-linux` package so we need to install this:
+```
+apk add util-linux
+```
 
 ## 2 The Linux Shell
 
