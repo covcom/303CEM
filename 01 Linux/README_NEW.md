@@ -100,7 +100,27 @@ If this command is not available you may need to manually copy the public key, l
 
 Once you have done this you should be able to SSH in as normal. the server will authorise using the shared public key and you won't be asked for a password.
 
-#### 2.1.3 Tasks
+#### 2.1.3 Changing the Shell Prompt
+
+The terminal prompt displays useful information. For example here is a sample prompt from my laptop:
+```
+mark@mark-ThinkPad-T450s:~/Documents$
+```
+It includes the username, the computer name and the current filepath.
+
+It is possible to customise this. The settings are stored in the `PS1` environment variable.
+```
+$ echo $PS1
+\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
+mark@mark-ThinkPad-T450
+```
+To change the prompt you simply set the `PS1` environment variable using special escape characters to insert certain data. For example to only display the current directory, see http://ezprompt.net/ for details:
+```
+$ PS1="\W$ "
+~$ cd  
+```
+
+#### 2.1.4 Tasks
 
 1. Log into your server VM over SSH using the username and password you chose. Notice the shell prompt which ends with a **$** symbol.
 2. Log out by using the `exit` command.
