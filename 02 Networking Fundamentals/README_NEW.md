@@ -365,6 +365,20 @@ iptables -L
   Chain OUTPUT (policy accept)
     target     prot opt source      destination
 ```
+### Tables
+
+The iptables firewall uses tables to organize its rules. These tables classify rules according to the type of decisions they are used to make. For instance, if a rule deals with network address translation, it will be put into the nat table. If the rule is used to decide whether to allow the packet to continue to its destination, it would probably be added to the filter table.
+
+You have probably noticed that your _NAT_ rules are not being shown in the list. This is because only one of the tables is being displayed. If you want to see the rules in a different table you need to specify this when you ask the `iptables` command to display its rules. There are several different tables but we are only interested in two of these:
+
+1. **filter** - the filter table is used to make decisions about whether to let a packet continue to its intended destination or to deny its request. This is the default value.
+2. **nat** - The nat table is used to implement network address translation rules to route data between IP addresses.
+
+If you want to see the **NAT** rules in a different table you need to specify this using the `--table` or `-t` flag. You can also add a `--verbose` or `-v` flag for additional information:
+```
+iptables --table nat --list
+iptables -t nat -L
+```
 
 ### Testing
 
